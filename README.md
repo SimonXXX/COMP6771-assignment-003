@@ -285,7 +285,7 @@
 <div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> weights<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> from, N <span class="kw">const</span><span class="op">&amp;</span> to<span class="op">)</span> <span class="op">-&gt;</span> std<span class="op">::</span>vector<span class="op">&lt;</span>E<span class="op">&gt;</span>;</span></code></pre></div>
 <ol start="8" type="1">
 <li><p><em>Returns</em>: A sequence of weights from <code class="sourceCode default">src</code> to <code class="sourceCode default">dst</code>, sorted in ascending order.</p></li>
-<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + log (<em>e</em>))</span>, where <span class="math inline"><em>n</em></span> is the number of stored nodes and <span class="math inline"><em>e</em></span> is the number of stored edges.</p></li>
+<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the number of stored nodes and <span class="math inline"><em>e</em></span> is the number of stored edges.</p></li>
 <li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::weights if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>.</p></li>
 </ol>
 <p><br /></p>
