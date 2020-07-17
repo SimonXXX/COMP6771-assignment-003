@@ -1,7 +1,7 @@
 # Copyright (c) Christopher Di Bella.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-Checks: "abseil-*,bugprone-*,cert-*,clang-analyzer-*,cppcoreguildelines-*,google-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-bugprone-exception-escape,-bugprone-forwarding-reference-overload,-cert-msc32-c,-cert-msc51-cpp,-clang-diagnostic-missing-prototypes,-clang-diagnostic-unused-command-line-argument,-google-runtime-int,-google-runtime-references,-misc-no-recursion,-misc-non-private-member-variables-in-classes,-readability-function-size,-readability-named-parameter,-readability-magic-numbers"
+Checks: "abseil-*,bugprone-*,cert-*,clang-analyzer-*,cppcoreguildelines-*,google-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-bugprone-exception-escape,-bugprone-forwarding-reference-overload,-cert-msc32-c,-cert-msc51-cpp,-clang-diagnostic-missing-prototypes,-clang-diagnostic-unused-command-line-argument,-google-runtime-int,-google-runtime-references,-misc-no-recursion,-misc-non-private-member-variables-in-classes,-readability-function-size,-readability-named-parameter,-readability-magic-numbers,-bugprone-reserved-identifier,-cert-dcl37-c,-cert-dcl51-cpp"
 WarningsAsErrors: "*"
 
 CheckOptions:
