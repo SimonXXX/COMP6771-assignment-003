@@ -64,12 +64,14 @@
 <li><a href="#5-originality-of-work"><span class="toc-section-number">5</span> Originality of Work<span></span></a></li>
 <li><a href="#6-submission"><span class="toc-section-number">6</span> Submission<span></span></a></li>
 <li><a href="#7-late-submission-policy"><span class="toc-section-number">7</span> Late Submission Policy<span></span></a></li>
+<li><a href="#8-cmake-tools-workaround"><span class="toc-section-number">8</span> CMake Tools workaround<span></span></a></li>
 </ul>
 </div>
 <p><strong>Please <code class="sourceCode default">git pull</code> frequently to get the latest changes.</strong></p>
 <p><strong>You will be required to update the toolchain for this assignment. The CSE machines have already taken this update into account. See Tutorial 8 for directions on how to update at home.</strong></p>
 <h1 data-number="1" id="change-log"><span class="header-section-number">1</span> Change Log<a href="#change-log" class="self-link"></a></h1>
 <ul>
+<li><b>2020-07-18</b>: Implements workaround for CMake Tools configure bug</li>
 <li>First revision</li>
 </ul>
 <h1 data-number="2" id="the-task"><span class="header-section-number">2</span> The Task<a href="#the-task" class="self-link"></a></h1>
@@ -621,6 +623,10 @@ Clarity — If your test case failed, it should be immediately obvious what went
 <p>If your assignment is submitted after this date, each hour it is late reduces the maximum mark it can achieve by 2%.</p>
 <p>For example if an assignment you submitted with a raw awarded mark of 85% was submitted 5 hours late, the late submission would have no effect (as maximum mark would be 90%).</p>
 <p>If the same assignment was submitted 20 hours late it would be awarded 60%, the maximum mark it can achieve at that time.</p>
+<h1 data-number="8" id="cmake-tools-workaround"><span class="header-section-number">8</span> CMake Tools workaround<a href="#cmake-tools-workaround" class="self-link"></a></h1>
+<p>There appears to be a bug in the configuration stage for the CMake Tools VS Code extension, when you already have an existing build cache (build directory). It's unlikely that this bug will be fixed before the term ends, so we've updated the project settings for VS Code so that CMake Tools won't auto-configure for you any more, but this means that you'll manually need to run this <em>very specific</em> configuration step.</p>
+<p>Instead of running <code>CMake: Configure</code> when you press <em>Ctrl+Shift+P</em>, you'll need to run <code>CMake: Delete Cache and Reconfigure</code>. This will delete your build cache and require you to rebuild everything, but at least it will work without major confusion.</p>
+<p><b>The critical part to remember is that unlike in Assignments 1 and 2 where you could add a new file and it would automatically reconfigure, you will need to re-run this step every single time you edit any <code>CMakeLists.txt</code>.</b></p>
 </div>
 </div>
 </body>
