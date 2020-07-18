@@ -58,7 +58,6 @@ ConstructorInitializerIndentWidth: 0
 ContinuationIndentWidth: 3
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
-ForEachMacros: ["for_each"]
 IncludeBlocks: Preserve
 IndentCaseBlocks: false
 IndentCaseLabels: false
