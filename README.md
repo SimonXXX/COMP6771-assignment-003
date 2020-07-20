@@ -71,6 +71,7 @@
 <p><strong>You will be required to update the toolchain for this assignment. The CSE machines have already taken this update into account. See Tutorial 8 for directions on how to update at home.</strong></p>
 <h1 data-number="1" id="change-log"><span class="header-section-number">1</span> Change Log<a href="#change-log" class="self-link"></a></h1>
 <ul>
+<li><b>2020-07-19</b>: Updates complexity for <code>erase_node</code> and <code>erase_edges</code></li>
 <li><b>2020-07-18</b>: Implements workaround for CMake Tools configure bug</li>
 <li>First revision</li>
 </ul>
@@ -228,7 +229,7 @@
 <div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="kw">auto</span> erase_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> value<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
 <ol start="16" type="1">
 <li><p><em>Effects</em>: Erases all nodes equivalent to <code class="sourceCode default">value</code>, including all incoming and outgoing edges.</p></li>
-<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(<em>n</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored edges.</p></li>
+<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log(<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored nodes and <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if <code class="sourceCode default">value</code> was removed; <code class="sourceCode default">false</code> otherwise.</p></li>
 </ol>
 <p><br /></p>
@@ -238,7 +239,7 @@
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if an edge was removed; <code class="sourceCode default">false</code> otherwise.</p></li>
 <li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
 <li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call comp6771::graph&lt;N, E&gt;::erase_edge on src or dst if they don&#39;t exist in the graph&quot;)</code> if either <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> is <code class="sourceCode default">false</code>.</p></li>
-<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(<em>e</em>)</span>, where <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
+<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log(<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored nodes and <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">auto</span> erase_edge<span class="op">(</span>iterator i<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
