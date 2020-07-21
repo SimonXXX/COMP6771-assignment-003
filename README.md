@@ -71,6 +71,7 @@
 <p><strong>You will be required to update the toolchain for this assignment. The CSE machines have already taken this update into account. See Tutorial 8 for directions on how to update at home.</strong></p>
 <h1 data-number="1" id="change-log"><span class="header-section-number">1</span> Change Log<a href="#change-log" class="self-link"></a></h1>
 <ul>
+<li><b>2020-07-20</b>: Updates complexity for <code>erase_edge</code> and updates <code>cmake-kits.json</code> to work around vcpkg bug.</li>
 <li><b>2020-07-19</b>: Updates complexity for <code>erase_node</code> and <code>erase_edges</code></li>
 <li><b>2020-07-18</b>: Implements workaround for CMake Tools configure bug</li>
 <li>First revision</li>
@@ -245,7 +246,7 @@
 <div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">auto</span> erase_edge<span class="op">(</span>iterator i<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
 <ol start="24" type="1">
 <li><p><em>Effects</em>: Erases the edge pointed to by <code class="sourceCode default">i</code>.</p></li>
-<li><p><em>Complexity</em>: Constant time.</p></li>
+<li><p><em>Complexity</em>: Amortised constant time.</p></li>
 <li><p><em>Returns</em>: An iterator pointing to the element immediately after <code class="sourceCode default">i</code> prior to the element being erased. If no such element exists, returns <code class="sourceCode default">end()</code>.</p></li>
 </ol>
 <p><br /></p>
