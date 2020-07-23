@@ -76,6 +76,19 @@
   * Removes confusing "diamond suffix" from `operator<<`
   * Clarifies complexity for range-based `erase_edge`, to make it clearer that the complexity is with respect to the range passed in (and the graph itself is just a really big constant).
   * Changes exception messages for `replace_node` and `connections` so that they match the member functions' names.
+    <table>
+      <thead><th>Member function</th><th>Before</th><th>After</th></thead>
+      <tr>
+        <td><code>replace_node</code></td>
+        <td><code>"Cannot call comp6771::graph&lt;N, E&gt;::replace on a node that doesn&#39;t exist"</code></td>
+        <td><code>"Cannot call comp6771::graph&lt;N, E&gt;::<b>replace_node</b> on a node that doesn&#39;t exist"</code></td>
+      </tr>
+      <tr>
+        <td><code>connections</code></td>
+        <td><code>"Cannot call gdwg::graph&lt;N, E&gt;::connected if src doesn&#39;t exist in the graph"</code></td>
+        <td><code>"Cannot call gdwg::graph&lt;N, E&gt;::<b>connections</b> if src doesn&#39;t exist in the graph"</code></td>
+      </tr>
+    </table>
 * **2020-07-20**: Updates complexity for `erase_edge` and updates `cmake-kits.json` to work around vcpkg bug.
 * **2020-07-19**: Updates complexity for `erase_node` and `erase_edges`
 * **2020-07-18**: Implements workaround for CMake Tools configure bug
