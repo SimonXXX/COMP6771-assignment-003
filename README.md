@@ -70,12 +70,30 @@
 <p><strong>Please <code class="sourceCode default">git pull</code> frequently to get the latest changes.</strong></p>
 <p><strong>You will be required to update the toolchain for this assignment. The CSE machines have already taken this update into account. See Tutorial 8 for directions on how to update at home.</strong></p>
 <h1 data-number="1" id="change-log"><span class="header-section-number">1</span> Change Log<a href="#change-log" class="self-link"></a></h1>
-<ul>
-<li><b>2020-07-20</b>: Updates complexity for <code>erase_edge</code> and updates <code>cmake-kits.json</code> to work around vcpkg bug.</li>
-<li><b>2020-07-19</b>: Updates complexity for <code>erase_node</code> and <code>erase_edges</code></li>
-<li><b>2020-07-18</b>: Implements workaround for CMake Tools configure bug</li>
-<li>First revision</li>
-</ul>
+
+* **2020-07-22**:
+  * Removes _mandatory_ `noexcept` specifier from `is_connected`, `is_node`, `nodes`, and `find` (you can still add them if you think they're necessary).
+  * Removes confusing "diamond suffix" from `operator<<`
+  * Clarifies complexity for range-based `erase_edge`, to make it clearer that the complexity is with respect to the range passed in (and the graph itself is just a really big constant).
+  * Changes exception messages for `replace_node` and `connections` so that they match the member functions' names.
+    <table>
+      <thead><th>Member function</th><th>Before</th><th>After</th></thead>
+      <tr>
+        <td><code>replace_node</code></td>
+        <td><code>"Cannot call comp6771::graph&lt;N, E&gt;::replace on a node that doesn&#39;t exist"</code></td>
+        <td><code>"Cannot call comp6771::graph&lt;N, E&gt;::<b>replace_node</b> on a node that doesn&#39;t exist"</code></td>
+      </tr>
+      <tr>
+        <td><code>connections</code></td>
+        <td><code>"Cannot call gdwg::graph&lt;N, E&gt;::connected if src doesn&#39;t exist in the graph"</code></td>
+        <td><code>"Cannot call gdwg::graph&lt;N, E&gt;::<b>connections</b> if src doesn&#39;t exist in the graph"</code></td>
+      </tr>
+    </table>
+* **2020-07-20**: Updates complexity for `erase_edge` and updates `cmake-kits.json` to work around vcpkg bug.
+* **2020-07-19**: Updates complexity for `erase_node` and `erase_edges`
+* **2020-07-18**: Implements workaround for CMake Tools configure bug
+* First revision
+
 <h1 data-number="2" id="the-task"><span class="header-section-number">2</span> The Task<a href="#the-task" class="self-link"></a></h1>
 <p>Write a <code class="sourceCode default">graph</code> library type in C++, in <code class="sourceCode default">include/gdwg/graph.hpp</code>.</p>
 <p>In this assignment, you will write a <em>generic directed weighted graph</em> (GDWG) with value-semantics in C++. Both the data stored at a node and the weight stored at an edge will be parameterised types. The types may be different. For example, here is a graph with nodes storing <code class="sourceCode default">std::string</code> and edges weighted by <code class="sourceCode default">int</code>:</p>
@@ -202,7 +220,7 @@
 <li><p><em>Effects</em>: Replaces the original data, <code class="sourceCode default">old_data</code>, stored at this particular node by the replacement data, <code class="sourceCode default">new_data</code>. Does nothing if <code class="sourceCode default">new_data</code> already exists as a node.</p></li>
 <li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">false</code> if a node that contains value <code class="sourceCode default">new_data</code> already exists and <code class="sourceCode default">true</code> otherwise.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call comp6771::graph&lt;N, E&gt;::replace on a node that doesn&#39;t exist&quot;)</code> if <code class="sourceCode default">is_node(old_data)</code> is <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call comp6771::graph&lt;N, E&gt;::replace_node on a node that doesn&#39;t exist&quot;)</code> if <code class="sourceCode default">is_node(old_data)</code> is <code class="sourceCode default">false</code>.</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="kw">auto</span> merge_replace_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> old_data, N <span class="kw">const</span><span class="op">&amp;</span> new_data<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">void</span>;</span></code></pre></div>
@@ -253,7 +271,7 @@
 <div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="kw">auto</span> erase_edge<span class="op">(</span>iterator i, iterator s<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
 <ol start="27" type="1">
 <li><p><em>Effects</em>: Erases all edges in the range <code class="sourceCode default">[i, s)</code>.</p></li>
-<li><p><em>Complexity</em> <span class="math inline"><em>O</em>(<em>N</em>)</span>, where <span class="math inline"><em>N</em>=</span><code class="sourceCode default">ranges::distance(i, s)</code>.</p></li>
+<li><p><em>Complexity</em> <span class="math inline"><em>O</em>(<em>d</em>)</span>, where <span class="math inline"><em>d</em>=</span><code class="sourceCode default">ranges::distance(i, s)</code>.</p></li>
 <li><p><em>Returns</em>: An iterator equivalent to <code class="sourceCode default">s</code> prior to the range being erased. If no such element exists, returns <code class="sourceCode default">end()</code>.</p></li>
 </ol>
 <p><br /></p>
@@ -263,7 +281,7 @@
 <li><p><em>Postconditions</em>: <code class="sourceCode default">empty()</code> is <code class="sourceCode default">true</code>.</p></li>
 </ol>
 <h2 data-number="2.4" id="accessors-gdwg.accessors"><span class="header-section-number">2.4</span> Accessors [gdwg.accessors]<a href="#accessors-gdwg.accessors" class="self-link"></a></h2>
-<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> is_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> value<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> is_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> value<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
 <ol type="1">
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if a node equivalent to <code class="sourceCode default">value</code> exists in the graph, and <code class="sourceCode default">false</code> otherwise.</p></li>
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>))</span> time.</p></li>
@@ -274,13 +292,13 @@
 <li><em>Returns</em>: <code class="sourceCode default">true</code> if there are no nodes in the graph, and <code class="sourceCode default">false</code> otherwise.</li>
 </ol>
 <p><br /></p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> is_connected<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> is_connected<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
 <ol start="4" type="1">
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if the edge <code class="sourceCode default">src</code> → <code class="sourceCode default">dst</code> exists in the graph, and <code class="sourceCode default">false</code> otherwise.</p></li>
 <li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::is_connected if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>.</p></li>
 </ol>
 <p><br /></p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> nodes<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">-&gt;</span> std<span class="op">::</span>vector<span class="op">&lt;</span>N<span class="op">&gt;</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> nodes<span class="op">()</span> <span class="op">-&gt;</span> std<span class="op">::</span>vector<span class="op">&lt;</span>N<span class="op">&gt;</span>;</span></code></pre></div>
 <ol start="6" type="1">
 <li><p><em>Returns</em>: A sequence of all stored nodes, sorted in ascending order.</p></li>
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(<em>n</em>)</span>, where <span class="math inline"><em>n</em></span> is the number of stored nodes.</p></li>
@@ -293,7 +311,7 @@
 <li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::weights if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>.</p></li>
 </ol>
 <p><br /></p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> find<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst, E <span class="kw">const</span><span class="op">&amp;</span> weight<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> find<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst, E <span class="kw">const</span><span class="op">&amp;</span> weight<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
 <p><br /></p>
 <ol start="11" type="1">
 <li><p><em>Returns</em>: An iterator pointing to an edge equivalent to <code class="sourceCode default">value_type{src, dst, weight}</code>, or <code class="sourceCode default">end()</code> if no such edge exists.</p></li>
@@ -304,7 +322,7 @@
 <ol start="13" type="1">
 <li><p><em>Returns</em>: A sequence of nodes (found from any immediate outgoing edge) connected to <code class="sourceCode default">src</code>, sorted in ascending order, with respect to the connected nodes.</p></li>
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>e</em></span> is the number of outgoing edges associated with <code class="sourceCode default">src</code>.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::connected if src doesn&#39;t exist in the graph&quot;)</code> if <code class="sourceCode default">is_node(src)</code> is <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::connections if src doesn&#39;t exist in the graph&quot;)</code> if <code class="sourceCode default">is_node(src)</code> is <code class="sourceCode default">false</code>.</p></li>
 </ol>
 <h2 data-number="2.5" id="range-access-gdwg.range.access"><span class="header-section-number">2.5</span> Range access [gdwg.range.access]<a href="#range-access-gdwg.range.access" class="self-link"></a></h2>
 <div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> begin<span class="op">()</span> <span class="kw">const</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
@@ -324,7 +342,7 @@
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(<em>n</em> + <em>e</em>)</span> where <span class="math inline"><em>n</em></span> is the sum of stored nodes in <code class="sourceCode default">*this</code> and <code class="sourceCode default">other</code>, and <span class="math inline"><em>e</em></span> is the sum of stored edges in <code class="sourceCode default">*this</code> and <code class="sourceCode default">other</code>.</p></li>
 </ol>
 <h2 data-number="2.7" id="extractor-gdwg.io"><span class="header-section-number">2.7</span> Extractor [gdwg.io]<a href="#extractor-gdwg.io" class="self-link"></a></h2>
-<div class="sourceCode" id="cb29"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a><span class="kw">friend</span> <span class="kw">auto</span> <span class="kw">operator</span><span class="op">&lt;&lt;&lt;&gt;(</span>std<span class="op">::</span>ostream<span class="op">&amp;</span> os, graph <span class="kw">const</span><span class="op">&amp;</span> g<span class="op">)</span> <span class="op">-&gt;</span> std<span class="op">::</span>ostream<span class="op">&amp;</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a><span class="kw">friend</span> <span class="kw">auto</span> <span class="kw">operator</span><span class="op">&lt;&lt;(</span>std<span class="op">::</span>ostream<span class="op">&amp;</span> os, graph <span class="kw">const</span><span class="op">&amp;</span> g<span class="op">)</span> <span class="op">-&gt;</span> std<span class="op">::</span>ostream<span class="op">&amp;</span>;</span></code></pre></div>
 <ol type="1">
 <li><p><em>Effects</em>: Behaves as a <a href="https://en.cppreference.com/w/cpp/named_req/FormattedOutputFunction">formatted output function</a> of <code class="sourceCode default">os</code>.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">os</code>.</p></li>
