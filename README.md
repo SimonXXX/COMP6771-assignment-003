@@ -67,10 +67,22 @@
 <li><a href="#8-cmake-tools-workaround"><span class="toc-section-number">8</span> CMake Tools workaround<span></span></a></li>
 </ul>
 </div>
-<p><strong>Please <code class="sourceCode default">git pull</code> frequently to get the latest changes.</strong></p>
-<p><strong>You will be required to update the toolchain for this assignment. The CSE machines have already taken this update into account. See Tutorial 8 for directions on how to update at home.</strong></p>
+<p><strong>Please <code class="sourceCode default">git pull</code> daily to get the latest changes.</strong></p>
+<p><strong>You will be required to update the toolchain for this assignment. See Tutorial 8 for directions.</strong></p>
 <h1 data-number="1" id="change-log"><span class="header-section-number">1</span> Change Log<a href="#change-log" class="self-link"></a></h1>
 
+* **2020-07-25**:
+  * Changes `#include "gdwg/graph.h"` to `#include "gdwg/graph.hpp"` in `source/client.cpp`.
+  * Corrects `iterator::operator*` return expression.
+  * Emboldens the note advising students **not** to use `ranges::make_common_tuple`.
+  * Adds postconditions to `erase_*` member functions (note: these postconditions were always there,
+    but some students asked we make it more explicit. This shouldn't change anything that you need
+    to do).
+  * Adds advisory notes to all member functions that might throw. **Although we don't expect you'll
+    need to change any code as a result of this message, you should double check this for
+    yourself.**
+  * Updates exception messages, replacing the `comp6771::` qualification typo with `gdwg::`. **This
+    is a semantic change that you will need to action.**
 * **2020-07-22**:
   * Removes _mandatory_ `noexcept` specifier from `is_connected`, `is_node`, `nodes`, and `find` (you can still add them if you think they're necessary).
   * Removes confusing "diamond suffix" from `operator<<`
@@ -212,7 +224,7 @@
 <li><p><em>Effects</em>: Adds a new edge representing <code class="sourceCode default">src</code> → <code class="sourceCode default">dst</code> with weight <code class="sourceCode default">weight</code>, if, and only if, there is no edge equivalent to <code class="sourceCode default">value_type{src, dst, weight}</code> already stored. [<em>Note</em>:⁠ Nodes are allowed to be connected to themselves. —<em>end note</em>]</p></li>
 <li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if the node is added to the graph and <code class="sourceCode default">false</code> otherwise.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::insert_edge when either src or dst node does not exist&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::insert_edge when either src or dst node does not exist&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="kw">auto</span> replace_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> old_data, N <span class="kw">const</span><span class="op">&amp;</span> new_data<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
@@ -220,14 +232,14 @@
 <li><p><em>Effects</em>: Replaces the original data, <code class="sourceCode default">old_data</code>, stored at this particular node by the replacement data, <code class="sourceCode default">new_data</code>. Does nothing if <code class="sourceCode default">new_data</code> already exists as a node.</p></li>
 <li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">false</code> if a node that contains value <code class="sourceCode default">new_data</code> already exists and <code class="sourceCode default">true</code> otherwise.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call comp6771::graph&lt;N, E&gt;::replace_node on a node that doesn&#39;t exist&quot;)</code> if <code class="sourceCode default">is_node(old_data)</code> is <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::replace_node on a node that doesn&#39;t exist&quot;)</code> if <code class="sourceCode default">is_node(old_data)</code> is <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="kw">auto</span> merge_replace_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> old_data, N <span class="kw">const</span><span class="op">&amp;</span> new_data<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">void</span>;</span></code></pre></div>
 <ol start="12" type="1">
 <li><p><em>Effects</em>: The node equivalent to <code class="sourceCode default">old_data</code> in the graph are replaced with instances of <code class="sourceCode default">new_data</code>. After completing, every incoming and outgoing edge of <code class="sourceCode default">old_data</code> becomes an incoming/ougoing edge of <code class="sourceCode default">new_data</code>, except that duplicate edges shall be removed.</p></li>
 <li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call comp6771::graph&lt;N, E&gt;::merge_replace_node on old or new data if they don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(old_data)</code> or <code class="sourceCode default">is_node(new_data)</code> are <code class="sourceCode default">false</code>. [<em>Note</em>: You are not required to replace <code class="sourceCode default">old</code> or <code class="sourceCode default">new data</code> with the values of <code class="sourceCode default">old_data</code> and <code class="sourceCode default">new_data</code>, unlike in Assignment 2 —<em>end note</em>]</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::merge_replace_node on old or new data if they don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(old_data)</code> or <code class="sourceCode default">is_node(new_data)</code> are <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
 <li><p>[<em>Note</em>: The following examples use the format <span class="math inline">(<em>N</em><sub><em>s</em><em>r</em><em>c</em></sub>, <em>N</em><sub><em>d</em><em>s</em><em>t</em></sub>, <em>E</em>)</span>. [<em>Example</em>: Basic example.</p></li>
 </ol>
 <ul>
@@ -248,35 +260,38 @@
 <div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="kw">auto</span> erase_node<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> value<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
 <ol start="16" type="1">
 <li><p><em>Effects</em>: Erases all nodes equivalent to <code class="sourceCode default">value</code>, including all incoming and outgoing edges.</p></li>
-<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log(<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored nodes and <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
+<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored nodes and <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if <code class="sourceCode default">value</code> was removed; <code class="sourceCode default">false</code> otherwise.</p></li>
+<li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a><span class="kw">auto</span> erase_edge<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst, E <span class="kw">const</span><span class="op">&amp;</span> weight<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
-<ol start="19" type="1">
+<ol start="20" type="1">
 <li><p><em>Effects</em>: Erases an edge representing <code class="sourceCode default">src</code> → <code class="sourceCode default">dst</code> with weight <code class="sourceCode default">weight</code>.</p></li>
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if an edge was removed; <code class="sourceCode default">false</code> otherwise.</p></li>
 <li><p><em>Postconditions</em>: All iterators are invalidated.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call comp6771::graph&lt;N, E&gt;::erase_edge on src or dst if they don&#39;t exist in the graph&quot;)</code> if either <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> is <code class="sourceCode default">false</code>.</p></li>
-<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log(<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored nodes and <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::erase_edge on src or dst if they don&#39;t exist in the graph&quot;)</code> if either <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> is <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
+<li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the total number of stored nodes and <span class="math inline"><em>e</em></span> is the total number of stored edges.</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">auto</span> erase_edge<span class="op">(</span>iterator i<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
-<ol start="24" type="1">
+<ol start="25" type="1">
 <li><p><em>Effects</em>: Erases the edge pointed to by <code class="sourceCode default">i</code>.</p></li>
 <li><p><em>Complexity</em>: Amortised constant time.</p></li>
 <li><p><em>Returns</em>: An iterator pointing to the element immediately after <code class="sourceCode default">i</code> prior to the element being erased. If no such element exists, returns <code class="sourceCode default">end()</code>.</p></li>
+<li><p><em>Postconditions</em>: All iterators are invalidated. [<em>Note</em>: The postcondition is slightly stricter than a real-world container to help make the assingment easier (i.e. we won’t be testing any iterators post-erasure). —<em>end note</em>]</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="kw">auto</span> erase_edge<span class="op">(</span>iterator i, iterator s<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
-<ol start="27" type="1">
+<ol start="29" type="1">
 <li><p><em>Effects</em>: Erases all edges in the range <code class="sourceCode default">[i, s)</code>.</p></li>
 <li><p><em>Complexity</em> <span class="math inline"><em>O</em>(<em>d</em>)</span>, where <span class="math inline"><em>d</em>=</span><code class="sourceCode default">ranges::distance(i, s)</code>.</p></li>
 <li><p><em>Returns</em>: An iterator equivalent to <code class="sourceCode default">s</code> prior to the range being erased. If no such element exists, returns <code class="sourceCode default">end()</code>.</p></li>
+<li><p><em>Postconditions</em>: All iterators are invalidated. [<em>Note</em>: The postcondition is slightly stricter than a real-world container to help make the assingment easier (i.e. we won’t be testing any iterators post-erasure). —<em>end note</em>]</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a><span class="kw">auto</span> clear<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">-&gt;</span> <span class="dt">void</span>;</span></code></pre></div>
-<ol start="30" type="1">
+<ol start="33" type="1">
 <li><p><em>Effects</em>: Erases all nodes from the graph.</p></li>
 <li><p><em>Postconditions</em>: <code class="sourceCode default">empty()</code> is <code class="sourceCode default">true</code>.</p></li>
 </ol>
@@ -295,7 +310,7 @@
 <div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> is_connected<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">bool</span>;</span></code></pre></div>
 <ol start="4" type="1">
 <li><p><em>Returns</em>: <code class="sourceCode default">true</code> if the edge <code class="sourceCode default">src</code> → <code class="sourceCode default">dst</code> exists in the graph, and <code class="sourceCode default">false</code> otherwise.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::is_connected if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::is_connected if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> nodes<span class="op">()</span> <span class="op">-&gt;</span> std<span class="op">::</span>vector<span class="op">&lt;</span>N<span class="op">&gt;</span>;</span></code></pre></div>
@@ -308,11 +323,10 @@
 <ol start="8" type="1">
 <li><p><em>Returns</em>: A sequence of weights from <code class="sourceCode default">src</code> to <code class="sourceCode default">dst</code>, sorted in ascending order.</p></li>
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>n</em></span> is the number of stored nodes and <span class="math inline"><em>e</em></span> is the number of stored edges.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::weights if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::weights if src or dst node don&#39;t exist in the graph&quot;)</code> if either of <code class="sourceCode default">is_node(src)</code> or <code class="sourceCode default">is_node(dst)</code> are <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
 </ol>
 <p><br /></p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> find<span class="op">(</span>N <span class="kw">const</span><span class="op">&amp;</span> src, N <span class="kw">const</span><span class="op">&amp;</span> dst, E <span class="kw">const</span><span class="op">&amp;</span> weight<span class="op">)</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
-<p><br /></p>
 <ol start="11" type="1">
 <li><p><em>Returns</em>: An iterator pointing to an edge equivalent to <code class="sourceCode default">value_type{src, dst, weight}</code>, or <code class="sourceCode default">end()</code> if no such edge exists.</p></li>
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + log (<em>e</em>))</span>, where <span class="math inline"><em>n</em></span> is the number of stored nodes and <span class="math inline"><em>e</em></span> is the number of stored edges.</p></li>
@@ -322,7 +336,7 @@
 <ol start="13" type="1">
 <li><p><em>Returns</em>: A sequence of nodes (found from any immediate outgoing edge) connected to <code class="sourceCode default">src</code>, sorted in ascending order, with respect to the connected nodes.</p></li>
 <li><p><em>Complexity</em>: <span class="math inline"><em>O</em>(log (<em>n</em>) + <em>e</em>)</span>, where <span class="math inline"><em>e</em></span> is the number of outgoing edges associated with <code class="sourceCode default">src</code>.</p></li>
-<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::connections if src doesn&#39;t exist in the graph&quot;)</code> if <code class="sourceCode default">is_node(src)</code> is <code class="sourceCode default">false</code>.</p></li>
+<li><p><em>Throws</em>: <code class="sourceCode default">std::runtime_error(&quot;Cannot call gdwg::graph&lt;N, E&gt;::connections if src doesn&#39;t exist in the graph&quot;)</code> if <code class="sourceCode default">is_node(src)</code> is <code class="sourceCode default">false</code>. [<em>Note</em>: Unlike Assignment 2, the exception message must be used verbatim. —<em>end note</em>]</p></li>
 </ol>
 <h2 data-number="2.5" id="range-access-gdwg.range.access"><span class="header-section-number">2.5</span> Range access [gdwg.range.access]<a href="#range-access-gdwg.range.access" class="self-link"></a></h2>
 <div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="kw">auto</span> begin<span class="op">()</span> <span class="kw">const</span> <span class="op">-&gt;</span> iterator;</span></code></pre></div>
@@ -454,10 +468,11 @@
 <ol type="1">
 <li><em>Effects</em>: Equivalent to:</li>
 </ol>
-<div class="sourceCode" id="cb37"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true"></a><span class="cf">return</span> <span class="op">{</span>pointee_<span class="op">-&gt;</span>from, pointee_<span class="op">-&gt;</span>to, pointee_<span class="op">-&gt;</span>weight<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true"></a><span class="kw">using</span> result_type <span class="op">=</span> ranges<span class="op">::</span>common_tuple<span class="op">&lt;</span>N <span class="kw">const</span><span class="op">&amp;</span>, N <span class="kw">const</span><span class="op">&amp;</span>, E <span class="kw">const</span><span class="op">&amp;&gt;</span>;</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true"></a><span class="cf">return</span> result_type<span class="op">(</span>pointee_<span class="op">-&gt;</span>from, pointee_<span class="op">-&gt;</span>to, pointee_<span class="op">-&gt;</span>weight<span class="op">)</span>;</span></code></pre></div>
 <ol start="2" type="1">
 <li><p><em>Remarks</em>: <code class="sourceCode default">ranges::common_tuple</code> is almost completely interface-compatible with <a href="https://en.cppreference.com/w/cpp/utility/tuple"><code class="sourceCode default">std::tuple</code></a>, but has subtle differences that make this assignment possible.</p></li>
-<li><p>[<em>Note</em>: Do not use <code class="sourceCode default">ranges::make_common_tuple</code> or <code class="sourceCode default">std::make_tuple</code>, as these will always copy values instead of returning references. —<em>end note</em>]</p></li>
+<li><p>[<em>Note</em>: Do <strong>not</strong> use <code class="sourceCode default">ranges::make_common_tuple</code> or <code class="sourceCode default">std::make_tuple</code>, as these will always copy values instead of returning references. —<em>end note</em>]</p></li>
 </ol>
 <h3 data-number="2.8.3" id="iterator-traversal-gdwg.iterator.traversal"><span class="header-section-number">2.8.3</span> Iterator traversal [gdwg.iterator.traversal]<a href="#iterator-traversal-gdwg.iterator.traversal" class="self-link"></a></h3>
 <div class="sourceCode" id="cb38"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true"></a><span class="kw">auto</span> <span class="kw">operator</span><span class="op">++()</span> <span class="op">-&gt;</span> iterator<span class="op">&amp;</span>;</span></code></pre></div>
@@ -465,7 +480,7 @@
 <li><em>Effects</em>: Advances <code class="sourceCode default">*this</code> to the next element in the range.</li>
 </ol>
 <p>[<em>Example</em>: In this way, your iterator will iterator through a graph like the one below producing the following tuple values when deferenced each time:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true"></a>comp6771<span class="op">::</span>graph<span class="op">&lt;</span><span class="dt">int</span>, <span class="dt">int</span><span class="op">&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true"></a>gdwg<span class="op">::</span>graph<span class="op">&lt;</span><span class="dt">int</span>, <span class="dt">int</span><span class="op">&gt;</span></span></code></pre></div>
 <p><img src="https://qph.fs.quoracdn.net/main-qimg-2ea8bf9286505bf2ccd63893e05eb5f9" /></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode txt"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a>(1, 7, 4)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a>(1, 12, 3)</span>
@@ -510,7 +525,7 @@
 <h2 data-number="2.9" id="compulsory-internal-representation-gdwg.internal"><span class="header-section-number">2.9</span> Compulsory internal representation [gdwg.internal]<a href="#compulsory-internal-representation-gdwg.internal" class="self-link"></a></h2>
 <p>Your graph is <strong>required</strong> to own the resources (nodes and edges) that are passed in through the insert functions. This means creating memory on the heap and doing a proper copy of the values from the caller. This is because resources in your graph should outlive the caller’s resouce that was passed in in case it goes out of scope. For example, we want the following code to be valid.</p>
 <div class="sourceCode" id="cb46"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true"></a><span class="kw">auto</span> main<span class="op">()</span> <span class="op">-&gt;</span> <span class="dt">int</span> <span class="op">{</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true"></a>  comp6771<span class="op">::</span>graph<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;</span> g;</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true"></a>  gdwg<span class="op">::</span>graph<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;</span> g;</span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true"></a>  <span class="op">{</span></span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true"></a>    std<span class="op">::</span>string s1<span class="op">{</span><span class="st">&quot;Hello&quot;</span><span class="op">}</span>;</span>
 <span id="cb46-5"><a href="#cb46-5" aria-hidden="true"></a>    g<span class="op">.</span>insert_node<span class="op">(</span>s1<span class="op">)</span>;</span>
@@ -644,9 +659,9 @@ Clarity — If your test case failed, it should be immediately obvious what went
 <p>For example if an assignment you submitted with a raw awarded mark of 85% was submitted 5 hours late, the late submission would have no effect (as maximum mark would be 90%).</p>
 <p>If the same assignment was submitted 20 hours late it would be awarded 60%, the maximum mark it can achieve at that time.</p>
 <h1 data-number="8" id="cmake-tools-workaround"><span class="header-section-number">8</span> CMake Tools workaround<a href="#cmake-tools-workaround" class="self-link"></a></h1>
-<p>There appears to be a bug in the configuration stage for the CMake Tools VS Code extension, when you already have an existing build cache (build directory). It's unlikely that this bug will be fixed before the term ends, so we've updated the project settings for VS Code so that CMake Tools won't auto-configure for you any more, but this means that you'll manually need to run this <em>very specific</em> configuration step.</p>
-<p>Instead of running <code>CMake: Configure</code> when you press <em>Ctrl+Shift+P</em>, you'll need to run <code>CMake: Delete Cache and Reconfigure</code>. This will delete your build cache and require you to rebuild everything, but at least it will work without major confusion.</p>
-<p><b>The critical part to remember is that unlike in Assignments 1 and 2 where you could add a new file and it would automatically reconfigure, you will need to re-run this step every single time you edit any <code>CMakeLists.txt</code>.</b></p>
+<p>There appears to be a bug in the configuration stage for the CMake Tools VS Code extension, when you already have an existing build cache (build directory). It’s unlikely that this bug will be fixed before the term ends, so we’ve updated the project settings for VS Code so that CMake Tools won’t auto-configure for you any more, but this means that you’ll manually need to run this <em>very specific</em> configuration step.</p>
+<p>Instead of running <code class="sourceCode default">CMake: Configure</code> when you press <em>Ctrl+Shift+P</em>, you’ll need to run <code class="sourceCode default">CMake: Delete Cache and Reconfigure</code>. This will delete your build cache and require you to rebuild everything, but at least it will work without major confusion.</p>
+<p><strong>The critical part to remember is that unlike in Assignments 1 and 2 where you could add a new file and it would automatically reconfigure, you will need to re-run this step every single time you edit any <code class="sourceCode default">CMakeLists.txt</code>.</strong></p>
 </div>
 </div>
 </body>
