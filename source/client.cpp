@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "gdwg/graph.h"
+#include "gdwg/graph.hpp"
 
 auto main() -> int {
 	auto g = gdwg::graph<std::string, int>{};
@@ -21,7 +21,7 @@ auto main() -> int {
 
 	std::cout << g << "\n";
 
-	auto g2 = gdwg::graph<std::string, int>{g};
+	auto g2 = gdwg::graph<std::string, int>(g);
 
 	std::cout << g2 << "\n";
 
