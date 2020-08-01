@@ -3,12 +3,8 @@
 #include <vector>
 
 #include "gdwg/graph.hpp"
-<<<<<<< HEAD
-
 using gdwg::graph;
-=======
->>>>>>> 82339a6ef6c15a7ce85b3dd289ff351b16cd1062
-
+//=======
 auto main() -> int {
 	// auto v = std::vector<std::string>{"df", "er", "hhh", "jjj", "ggggg", "yrdtrt", "dfg", "ff"};
 	// auto g = graph<std::string, int>{v.begin(), v.end()};
@@ -47,12 +43,10 @@ auto main() -> int {
 
 	// auto g2 = gdwg::graph<std::string, int>{g};
 
-<<<<<<< HEAD
 	// auto g3 = gdwg::graph<std::string, int>{"hello"};
 	// g3.print_vals();
-=======
+
 	auto g2 = gdwg::graph<std::string, int>(g);
->>>>>>> 82339a6ef6c15a7ce85b3dd289ff351b16cd1062
 
 	// std::cout << g2 << "\n";
 

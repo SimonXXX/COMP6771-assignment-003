@@ -4,6 +4,34 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <sstream>
+TEST_CASE("Constructors") {
+	SECTION("Constructors - no parameters") {
+		auto g1 = gdwg::graph<double, std::string>();
+		CHECK(g1.begin() == g1.end());
+	}
+
+	SECTION("Move constructor") {
+		using graph = gdwg::graph<int, double>;
+		auto const v = std::vector<graph::value_type>{{4, 1, -4.44},
+		                                              {3, 2, 2.22},
+		                                              {2, 4, 2.22},
+		                                              {2, 1, 1.11},
+		                                              {6, 2, 5.55}};
+		auto g1 = graph(v.begin(), v.end());
+		auto g2 = std::move(g1);
+		// NOLINTNEXTLINE
+		REQUIRE(g1.empty());
+		CHECK(g2.is_node(3));
+		auto g3 = graph{};
+		g3.insert_node(42);
+		g3.insert_node(999);
+		REQUIRE(g3.is_node(42));
+		g3 = std::move(g1);
+		// NOLINTNEXTLINE
+		REQUIRE(g1.empty());
+		CHECK(!g3.is_node(42));
+	}
+}
 
 TEST_CASE("basic test") {
 	auto g1 = gdwg::graph<int, std::string>{};
@@ -201,6 +229,32 @@ TEST_CASE("2.3 Modifiers [gdwg.modifiers]") {
 		std::cout << std::endl;
 
 		for (auto i : g1.weights('A', 'C')) {
+			std::cout << i << " ";
+		}
+		std::cout << std::endl;
+	}
+	SECTION("weights") {
+		auto v = std::vector<char>{0, 1, 4, 5, 6, 7, 2, 3};
+		auto g1 = gdwg::graph<int, std::string>(v.begin(), v.end());
+		g1.insert_edge(1, 4, "hello");
+		g1.insert_edge(1, 5, "1hello");
+		g1.insert_edge(1, 7, "2hello");
+		g1.insert_edge(1, 6, "3hello");
+		g1.insert_edge(1, 6, "7hello");
+		g1.insert_edge(0, 7, "34");
+		g1.insert_edge(1, 6, "!");
+		CHECK_THROWS_WITH(g1.is_connected('A', 'E'),
+		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't "
+		                  "exist in the graph");
+		CHECK_THROWS_WITH(g1.is_connected('E', 'A'),
+		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't "
+		                  "exist in the graph");
+
+		for (const auto& i : g1.weights(1, 6)) {
+			std::cout << i << " ";
+		}
+		std::cout << std::endl;
+		for (const auto& i : g1.connections(1)) {
 			std::cout << i << " ";
 		}
 		std::cout << std::endl;
