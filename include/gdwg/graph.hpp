@@ -12,6 +12,7 @@
 #include <limits>
 #include <memory>
 #include <ostream>
+#include <range/v3/algorithm.hpp>
 #include <range/v3/iterator.hpp>
 #include <range/v3/utility.hpp>
 #include <set>
@@ -26,7 +27,8 @@ namespace gdwg {
 	   and concepts::totally_ordered<E> //
 	   class graph {
 	public:
-		struct value_type { // edges
+		// struct for edge data
+		struct value_type {
 			N from;
 			N to;
 			E weight;
@@ -36,12 +38,13 @@ namespace gdwg {
 			}
 		};
 
-		// =================
-		// = INNER CLASSES =
-		// =================
-		//
-		class iterator;
+		class iterator; // forward declaration of iterator class
 
+		//   =============
+		//   INNER CLASSES
+		//   -------------
+		//
+		//   ----------
 		//   NODE CLASS
 		//   ----------
 		class node {
@@ -50,22 +53,23 @@ namespace gdwg {
 			node() {
 				node_value_ = N{};
 			}
-			explicit node(N val) {
+			explicit node(N const& val) {
 				node_value_ = val;
 			}
 			// node setters
-			void set_node_value(N val) {
+			void set_node_value(N const& val) {
 				node_value_ = val;
 			}
 			// node getters
-			[[nodiscard]] auto get_node_value() -> N {
+			[[nodiscard]] auto get_node_value() const -> N {
 				return node_value_;
 			}
 
 		private:
 			N node_value_{};
-		}; // end of node
+		};
 
+		//   ----------
 		//   EDGE CLASS
 		//   ----------
 		class edge {
@@ -114,8 +118,7 @@ namespace gdwg {
 			std::shared_ptr<node> to_ptr_;
 			E weight_;
 		};
-
-		// ====================
+		// --------------------
 		// END OF INNER CLASSES
 		// ====================
 		//
@@ -123,22 +126,20 @@ namespace gdwg {
 		// ================================
 		// CONSTRUCTORS (spec: section 2.2)
 		// --------------------------------
-
+		// constructor 1 ()
 		graph<N, E>() = default;
 
-		// explicit graph<N, E>(N val) {
-		// 	insert_node(val);
-		// }
+		// constructor 2 (ititializer_list)
+		graph(std::initializer_list<N> il)
+		: graph(il.begin(), il.end()) {}
 
-		graph(std::initializer_list<N> il) {
-			std::for_each(il.begin(), il.end(), [this](N const& n) { insert_node(n); });
-		}
-
+		// constructor 3 (range[first,last] - nodes)
 		template<ranges::forward_iterator I, ranges::sentinel_for<I> S>
 		requires ranges::indirectly_copyable<I, N*> graph<N, E>(I first, S last) {
 			std::for_each(first, last, [this](N const& n) { insert_node(n); });
 		}
 
+		// constructor 4 (range[first,last] - nodes and edges)
 		template<ranges::forward_iterator I, ranges::sentinel_for<I> S>
 		requires ranges::indirectly_copyable<I, value_type*> graph(I first, S last) {
 			std::for_each(first, last, [this](value_type v) {
@@ -164,24 +165,42 @@ namespace gdwg {
 			other.edge_list_.clear();
 			return *this;
 		}
-
+		// copy constructor
 		graph<N, E>(graph const&) = default;
+
+		// copy assignment
+		auto operator=(graph const& other) -> graph& {
+			if (this != &other) {
+				auto copy = graph(other);
+				std::swap(copy, *this);
+				return *this;
+			}
+			return *this;
+		}
 
 		// =============================
 		// MODIFIERS (spec: section 2.3)
 		// -----------------------------
 
+		// modifier 1 (inserting a node)
 		template<typename T>
-		auto insert_node(T const new_node) {
+		auto insert_node(T const new_node) -> bool {
 			if (!is_node(new_node)) {
-				node_list_.emplace(std::make_shared<node>(new_node));
+				return node_list_.emplace(std::make_shared<node>(new_node)).second;
 			}
+			return false;
 		}
-
+		// modifier 2 (inserting an edge)
 		template<typename T, typename U>
 		auto insert_edge(T f, T t, U w) -> bool {
+			if (!is_node(f) or !is_node(t)) {
+				throw std::runtime_error("Cannot call gdwg::graph<N, E>::insert_edge when either src "
+				                         "or dst node does not exist");
+			}
 			return edge_list_.emplace(std::make_shared<edge>(find_node(f), find_node(t), w)).second;
 		}
+
+		// modifier 3 (replacing a node)
 		auto replace_node(N const& old_data, N const& new_data) -> bool {
 			if (is_node(new_data)) {
 				return false;
@@ -196,6 +215,7 @@ namespace gdwg {
 			return true;
 		}
 
+		// modifier 4 (replacing a node and redirect weights to new node)
 		auto merge_replace_node(N const& old_data, N const& new_data) -> void {
 			if (!is_node(new_data) or !is_node(old_data)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::merge_replace_node on old "
@@ -211,99 +231,80 @@ namespace gdwg {
 				}
 			}
 			node_list_.erase(find_node(old_data)); // get rid of old node
-			// Effects: The node equivalent to old_data in the graph are replaced with instances
-			// of new_data. After completing, every incoming and outgoing edge of old_data
-			// becomes an incoming/ougoing edge of new_data, except that duplicate edges shall be
-			// removed.
-			// Postconditions: All iterators are invalidated.
-			// Throws: std::runtime_error("Cannot call gdwg::graph<N, E>::merge_replace_node on old
-			// or new data if they don't exist in the graph") if either of is_node(old_data) or
-			// is_node(new_data) are false.
 		}
-		auto erase_node(N const& value) -> bool {
+
+		// modifier 5 (erase node and edges from and to that node)
+		auto erase_node(N const& value) noexcept -> bool {
 			if (!is_node(value)) {
 				return false;
 			}
-			auto edges_2_delete = std::vector<std::shared_ptr<edge>>{};
-			for (auto it_edge_ptr : edge_list_) {
-				if (it_edge_ptr->get_from_node() == value) {
-					edges_2_delete.push_back(it_edge_ptr);
+			if (node_list_.erase(find_node(value))) { // only remove edges if node is deleted
+				// collect pointers to edges that need to be removed
+				auto edges_2_delete = std::vector<std::shared_ptr<edge>>{};
+				for (auto it_edge_ptr : edge_list_) {
+					if (it_edge_ptr->get_from_node() == value) {
+						edges_2_delete.push_back(it_edge_ptr);
+					}
+					if (it_edge_ptr->get_to_node() == value) {
+						edges_2_delete.push_back(it_edge_ptr);
+					}
 				}
-				if (it_edge_ptr->get_to_node() == value) {
-					edges_2_delete.push_back(it_edge_ptr);
+				//  delete those edges
+				for (auto edge_ptr : edges_2_delete) {
+					edge_list_.erase(edge_ptr);
 				}
+				return true;
 			}
-			for (auto edge_ptr : edges_2_delete) {
-				edge_list_.erase(edge_ptr);
-			}
-
-			return node_list_.erase(find_node(value));
+			return false;
 		}
-		// Effects: Erases all nodes equivalent to value, including all incoming and
-		// outgoing edges.
-		// Complexity: O(log (n) + e), where n is the total number of stored nodes
-		// and e is the total number of stored edges.
-		// Returns: true if value was removed; false
-		// otherwise.
-		// Postconditions: All iterators are invalidated.
 
+		// modifier 6 (remove an edge from the graph - with node/node/weight)
 		auto erase_edge(N const& src, N const& dst, E const& weight) -> bool {
 			if (!is_node(src) or !is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::erase_edge on src or dst "
-				                         "if "
-				                         "they don't exist in the graph");
+				                         "if they don't exist in the graph");
 			}
-			if (!is_edge(value_type{src, dst, weight})) {
-				return false;
+			return (is_edge(src, dst, weight) // edge exists and it can be deleted
+			        and edge_list_.erase(find_edge(src, dst, weight)));
+		}
+
+		// modifier 7 (remove an edge from graph - with an iterator)
+		auto erase_edge(iterator const& i) -> iterator {
+			iterator iii = i;
+			if (i != this->end()) {
+				// ranges::common_tuple<N const&, N const&, E const&> ii = *i;
+				erase_edge(std::get<0>(*iii), std::get<1>(*iii), std::get<2>(*iii));
 			}
-			return edge_list_.erase(find_edge(src, dst, weight));
-		};
-		// 		Effects: Erases an edge representing src → dst with weight weight.
-		// Returns: true if an edge was removed; false otherwise.
-		// Postconditions: All iterators are invalidated.
-		// Throws: std::runtime_error("Cannot call gdwg::graph<N, E>::erase_edge on src or dst if
-		// they don't exist in the graph") if either is_node(src) or is_node(dst) is false.
-		// Complexity: O(log (n) + e), where n is the total number of stored nodes and e is the
-		// total number of stored edges.
-		auto erase_edge(iterator i) -> iterator;
-		// Effects: Erases the edge pointed to by i.
-		// Complexity: Amortised constant time.
-		// Returns: An iterator pointing to the element immediately after i prior to the element
-		// being erased. If no such element exists, returns end(). Postconditions: All iterators
-		// are invalidated. [Note: The postcondition is slightly stricter than a real-world
-		// container to help make the assingment easier (i.e. we won’t be testing any iterators
-		// post-erasure). —end note]
-		auto erase_edge(iterator i, iterator s) -> iterator;
-		// Effects: Erases all edges in the range [i, s).
-		// Complexity O(d), where d=ranges::distance(i, s).
-		// Returns: An iterator equivalent to s prior to the range being erased. If no such element
-		// exists, returns end(). Postconditions: All iterators are invalidated. [Note: The
-		// postcondition is slightly stricter than a real-world container to help make the
-		// assingment easier (i.e. we won’t be testing any iterators post-erasure). —end note]
+			return iii;
+		}
+		// modifier 8 (erases a range of edges)
+		auto erase_edge(iterator& i, iterator& s) -> iterator {
+			value_type start({std::get<0>(*i), std::get<1>(*i), std::get<2>(*i)});
+			value_type end({std::get<0>(*s), std::get<1>(*s), std::get<2>(*s)});
+			edge_list_.erase(edge_list_.find(start), edge_list_.find(end));
+			return iterator(edge_list_, edge_list_.find(end));
+		}
+
+		// modifier 9 (erases all nodes and edges from graph)
 		auto clear() noexcept -> void {
 			edge_list_.clear();
 			node_list_.clear();
 		}
-		// Effects: Erases all nodes from the graph.
-		// Postconditions: empty() is true
 
 		// =======================
 		// ACCESSORS (section 2.4)
 		// -----------------------
-
+		// accessor 1 (checks if a value represents a node)
 		[[nodiscard]] auto is_node(N n) -> bool {
 			return node_list_.find(n) != node_list_.end();
 		}
-		[[nodiscard]] auto is_edge(N const& src, N const& dst, E const& weight) -> bool {
-			return edge_list_.find(value_type{src, dst, weight}) != edge_list_.end();
-		}
-		[[nodiscard]] auto is_edge(value_type e) -> bool {
-			return edge_list_.find(e) != edge_list_.end();
-		}
+
+		// accessor 2 (checks if the graph is empty
 		[[nodiscard]] auto empty() -> bool {
 			return node_list_.empty();
 		}
 
+		// accessor 3 (checks if two nodes are connected)
 		[[nodiscard]] auto is_connected(N const& src, N const& dst) -> bool {
 			if (!is_node(src) or !is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::is_connected if src or dst "
@@ -314,6 +315,7 @@ namespace gdwg {
 			        and ((*it1)->get_to_node() == dst));
 		}
 
+		// accessor 4 (returns a sequence of nodes
 		[[nodiscard]] auto nodes() -> std::vector<N> {
 			auto node_sequence = std::vector<N>{};
 			for (auto node_ptr : node_list_) {
@@ -321,12 +323,13 @@ namespace gdwg {
 			}
 			return node_sequence;
 		}
+
+		// accessor 5 (returns a sequence of weights)
 		[[nodiscard]] auto weights(N const& from, N const& to) -> std::vector<E> {
 			auto weights_sequence = std::vector<E>{};
 			if (!is_node(from) or !is_node(to)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::weights if src or dst node "
-				                         "don't "
-				                         "exist in the graph");
+				                         "don't exist in the graph");
 			}
 			auto w_it = edge_list_.lower_bound(value_type{from, to, std::numeric_limits<E>::min()});
 			while ((w_it != edge_list_.end()) and ((*w_it).get()->get_to_node() == to)) {
@@ -335,11 +338,11 @@ namespace gdwg {
 			}
 			return weights_sequence;
 		}
-
+		// accessor 6 (return an iterator to an edge)
 		[[nodiscard]] auto find(N const& src, N const& dst, E const& weight) -> iterator {
 			return iterator(edge_list_, edge_list_.find(value_type{src, dst, weight}));
 		}
-
+		// accessor 7 (returns a sequence of nodes connected to a given node)
 		[[nodiscard]] auto connections(N const& src) -> std::vector<N> {
 			auto connections = std::vector<N>{};
 			if (!is_node(src)) {
@@ -354,26 +357,25 @@ namespace gdwg {
 			}
 			return connections;
 		}
-		// Returns: A sequence of nodes (found from any immediate outgoing edge) connected to
-		// src, sorted in ascending order, with respect to the connected nodes.
-		// Complexity: O(log??(n)??+??e), where e is the number of outgoing edges associated with
-		// src.
 
 		// ==========================
 		// RANGE ACCESS (section 2.5)
 		// --------------------------
 
+		// range access 1 (return iterator to first element in graph)
 		[[nodiscard]] auto begin() const -> iterator {
 			// std::set<std::shared_ptr<edge>, edge_comparator> const& temp = edge_list_;
 			return iterator(edge_list_, edge_list_.begin());
 		}
+
+		// range access 2 (return iterator to end of the range of elements
 		[[nodiscard]] auto end() const -> iterator {
 			return iterator(edge_list_, edge_list_.end());
 		}
 
-		// ========================
-		// COMPARISONS(section 2.6)
-		// ------------------------
+		// =========================
+		// COMPARISONS (section 2.6)
+		// -------------------------
 
 		[[nodiscard]] auto operator==(graph const& other) const -> bool {
 			// check same number of nodes and edges
@@ -407,32 +409,10 @@ namespace gdwg {
 			return (e_it1 == this->edge_list_.end()); // edge lists aren't the same
 		}
 
-		// for (it1 = this->node_list_.begin(), it2 = other.node_list_.begin();
-		//      ((it1 == this->node_list_.end())
-		//       or ((*it1)->get_node_value() != (*it2)->get_node_value()));
-		//      ++it1, ++it2)
-		// {
-		// };
-		// for (auto i : zip(this->node_list_, other.node_list_)) {
-		// 	if (std::get<0>(i) != std::get<1>(i)->get_node_value()) {
-		// 		return false;
-		// 	}
-		// }
-		// check if edges are identical
-		// for (auto i : zip(this->edge_list_, other.edge_list_)) {
-		// 	if (std::get<0>(i)->get_edge_details() != std::get<1>(i)->get_edge_details()) {
-		// 		return false;
-		// 	}
-		// }
-		//}
-
-		// Returns: true if *this and other contain exactly the same nodes and edges, and false
-		// otherwise. Complexity: O(n??+??e) where n is the sum of stored nodes in *this and other,
-		// and e is the sum of stored edges in *this and other.
-
 		// ========================
 		// EXTRACTOR (section 2.7)
 		// ------------------------
+
 		auto friend operator<<(std::ostream& os, graph const& g) -> std::ostream& {
 			for (auto node_ptr : g.node_list_) {
 				os << fmt::format("{} (\n", node_ptr->get_node_value());
@@ -448,9 +428,9 @@ namespace gdwg {
 			return os;
 		}
 
-		// ==============================
-		//  FUNCTIONS FOR TESTING ONLY  |
-		// ------------------------------
+		// ===========================
+		//  FUNCTIONS FOR TESTING ONLY
+		// ---------------------------
 		auto print_vals_test() {
 			for (auto it = node_list_.begin(); it != node_list_.end(); it++) {
 				std::cout << "The value is: " << it->get()->get_node_value() << std::endl;
@@ -464,8 +444,8 @@ namespace gdwg {
 		auto print_edges_test() {
 			for (auto it = edge_list_.begin(); it != edge_list_.end(); it++) {
 				std::cout << it->get()->get_from_node() << "(" << it->get()->get_from_count() << ")"
-				          << " -> " << it->get()->get_edge_weight() << " -> "
-				          << it->get()->get_to_node() << std::endl;
+				          << " -> " << it->get()->get_to_node() << " -> "
+				          << it->get()->get_edge_weight() << std::endl;
 			}
 		}
 
@@ -513,6 +493,13 @@ namespace gdwg {
 		auto find_edge(value_type e) -> std::shared_ptr<edge> const& {
 			return *edge_list_.find(e);
 		}
+
+		[[nodiscard]] auto is_edge(N const& src, N const& dst, E const& weight) -> bool {
+			return edge_list_.find(value_type{src, dst, weight}) != edge_list_.end();
+		}
+		// [[nodiscard]] auto is_edge(value_type e) -> bool {
+		// 	return edge_list_.find(e) != edge_list_.end();
+		// }
 
 		// COMPARATORS
 		struct node_comparator {
@@ -565,7 +552,7 @@ namespace gdwg {
 		std::set<std::shared_ptr<edge>, edge_comparator> edge_list_{}; // EDGE LIST (SET)
 
 	public:
-	}; // namespace gdwg
+	}; // END of GRAPH CLASS
 
 	//   ITERATOR CLASS
 	//   --------------
@@ -581,7 +568,7 @@ namespace gdwg {
 		using graph_iterator = typename std::set<std::shared_ptr<edge>>::const_iterator;
 
 		// iterator constructor
-		// iterator() = default;
+		iterator() = default;
 		explicit iterator(std::set<std::shared_ptr<edge>, edge_comparator> const& edge_list,
 		                  graph_iterator const& it)
 		: edge_list_ref_(edge_list)
