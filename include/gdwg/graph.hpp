@@ -12,6 +12,7 @@
 #include <limits>
 #include <memory>
 #include <ostream>
+#include <pthread.h>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/iterator.hpp>
 #include <range/v3/utility.hpp>
@@ -221,6 +222,12 @@ namespace gdwg {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::merge_replace_node on old "
 				                         "or new data if they don't exist in the graph");
 			}
+			// get rid of old node
+			node_list_.erase(find_node(old_data));
+
+			if (edge_list_.empty()) {
+				return; // no edges - no point looking for them
+			}
 			// reroute edges
 			for (auto it_edge_ptr : edge_list_) {
 				if (it_edge_ptr->get_from_node() == old_data) {
@@ -230,7 +237,9 @@ namespace gdwg {
 					it_edge_ptr->set_to_ptr(find_node(new_data));
 				}
 			}
-			node_list_.erase(find_node(old_data)); // get rid of old node
+
+			// get rid of duplicate edges
+			remove_duplicate_edges();
 		}
 
 		// modifier 5 (erase node and edges from and to that node)
@@ -269,20 +278,27 @@ namespace gdwg {
 		}
 
 		// modifier 7 (remove an edge from graph - with an iterator)
-		auto erase_edge(iterator const& i) -> iterator {
-			iterator iii = i;
-			if (i != this->end()) {
-				// ranges::common_tuple<N const&, N const&, E const&> ii = *i;
-				erase_edge(std::get<0>(*iii), std::get<1>(*iii), std::get<2>(*iii));
+		auto erase_edge(iterator& it) -> iterator {
+			if (it == this->end()) {
+				return it; // no edge to remove
 			}
-			return iii;
+			auto this_edge = get_value_type(it);
+			auto it_cpy = it;
+			auto next_edge = ++it_cpy != end() ? get_value_type(it_cpy) : this_edge;
+			erase_edge(this_edge.from, this_edge.to, this_edge.weight);
+			return this_edge == next_edge ? end() : find(next_edge.from, next_edge.to, next_edge.weight);
 		}
+
 		// modifier 8 (erases a range of edges)
 		auto erase_edge(iterator& i, iterator& s) -> iterator {
-			value_type start({std::get<0>(*i), std::get<1>(*i), std::get<2>(*i)});
-			value_type end({std::get<0>(*s), std::get<1>(*s), std::get<2>(*s)});
-			edge_list_.erase(edge_list_.find(start), edge_list_.find(end));
-			return iterator(edge_list_, edge_list_.find(end));
+			if ((i == end()) or (i == s)) {
+				return i; // nothing to do
+			}
+
+			auto start_edge = get_value_type(i);
+			auto end_edge = s != end() ? get_value_type(s) : start_edge;
+			edge_list_.erase(edge_list_.find(start_edge), edge_list_.find(end_edge));
+			return start_edge == end_edge ? end() : find(end_edge.from, end_edge.to, end_edge.weight);
 		}
 
 		// modifier 9 (erases all nodes and edges from graph)
@@ -493,6 +509,28 @@ namespace gdwg {
 		auto find_edge(value_type e) -> std::shared_ptr<edge> const& {
 			return *edge_list_.find(e);
 		}
+		auto get_value_type(iterator& it) -> value_type {
+			return (value_type{std::get<0>(*it), std::get<1>(*it), std::get<2>(*it)});
+		}
+		auto remove_duplicate_edges() {
+			auto edges_to_delete = std::vector<value_type>{};
+			auto it_edge_ptr = edge_list_.begin();
+			auto prev = (*it_edge_ptr++)->get_edge_details();
+			while (it_edge_ptr != edge_list_.end()) {
+				if ((*it_edge_ptr)->get_edge_details() == prev) {
+					edges_to_delete.push_back(prev);
+				}
+				++it_edge_ptr;
+			}
+			for (auto i : edges_to_delete) {
+				erase_edge(i.from, i.to, i.weight);
+			}
+		}
+
+		// auto find_weight(N const& src, N const& dst) -> E {
+		// return ()
+
+		// }
 
 		[[nodiscard]] auto is_edge(N const& src, N const& dst, E const& weight) -> bool {
 			return edge_list_.find(value_type{src, dst, weight}) != edge_list_.end();
@@ -552,7 +590,7 @@ namespace gdwg {
 		std::set<std::shared_ptr<edge>, edge_comparator> edge_list_{}; // EDGE LIST (SET)
 
 	public:
-	}; // END of GRAPH CLASS
+	}; // namespace gdwg
 
 	//   ITERATOR CLASS
 	//   --------------
