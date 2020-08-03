@@ -443,63 +443,12 @@ namespace gdwg {
 			}
 			return os;
 		}
-
-		// ===========================
-		//  FUNCTIONS FOR TESTING ONLY
-		// ---------------------------
-		auto print_vals_test() {
-			for (auto it = node_list_.begin(); it != node_list_.end(); it++) {
-				std::cout << "The value is: " << it->get()->get_node_value() << std::endl;
-				for (auto it2 = this->edge_list_.begin(); it2 != this->edge_list_.end(); it2++) {
-					if (it2->get()->get_from_node() == it->get()->get_node_value()) {
-						std::cout << "The edge is: " << it2->get()->get_edge_weight() << std::endl;
-					}
-				}
-			}
-		}
-		auto print_edges_test() {
-			for (auto it = edge_list_.begin(); it != edge_list_.end(); it++) {
-				std::cout << it->get()->get_from_node() << "(" << it->get()->get_from_count() << ")"
-				          << " -> " << it->get()->get_to_node() << " -> "
-				          << it->get()->get_edge_weight() << std::endl;
-			}
-		}
-
-		auto edge_details_test(value_type const& e) -> std::string {
-			// returns a string  from_node (ptr_count) | weight | to_node (ptr_count)
-			auto return_string = std::string{};
-			auto it = edge_list_.find(e);
-			if (it != edge_list_.end()) {
-				return_string = fmt::format("{}({}) | {} | {}({}) ",
-				                            (*it).get()->get_from_node(),
-				                            (*it).get()->get_from_count(),
-				                            (*it).get()->get_edge_weight(),
-				                            (*it).get()->get_to_node(),
-				                            (*it).get()->get_to_count());
-			}
-			return return_string;
-		}
-
-		auto test_edge_details(E e) -> std::string {
-			// returns a string  from_node (ptr_count) | weight | to_node (ptr_count)
-			auto return_string = std::string{};
-			auto it = edge_list_.find(e); // find first occurance
-			while (it != edge_list_.end()) {
-				return_string = fmt::format("{}{}({}) | {} | {}({}) ",
-				                            return_string,
-				                            (*it).get()->get_from_node(),
-				                            (*it).get()->get_from_count(),
-				                            (*it).get()->get_edge_weight(),
-				                            (*it).get()->get_to_node(),
-				                            (*it).get()->get_to_count());
-				it++; // could be another one
-			}
-			return return_string;
-		}
-
 		// Helper/utility functions
 
 	private:
+		// ========================
+		// Helper/utility functions
+		// ------------------------
 		auto find_node(N n) -> std::shared_ptr<node> const& {
 			return *node_list_.find(n);
 		}
@@ -511,6 +460,9 @@ namespace gdwg {
 		}
 		auto get_value_type(iterator& it) -> value_type {
 			return (value_type{std::get<0>(*it), std::get<1>(*it), std::get<2>(*it)});
+		}
+		[[nodiscard]] auto is_edge(N const& src, N const& dst, E const& weight) -> bool {
+			return edge_list_.find(value_type{src, dst, weight}) != edge_list_.end();
 		}
 		auto remove_duplicate_edges() {
 			auto edges_to_delete = std::vector<value_type>{};
@@ -526,20 +478,9 @@ namespace gdwg {
 				erase_edge(i.from, i.to, i.weight);
 			}
 		}
-
-		// auto find_weight(N const& src, N const& dst) -> E {
-		// return ()
-
-		// }
-
-		[[nodiscard]] auto is_edge(N const& src, N const& dst, E const& weight) -> bool {
-			return edge_list_.find(value_type{src, dst, weight}) != edge_list_.end();
-		}
-		// [[nodiscard]] auto is_edge(value_type e) -> bool {
-		// 	return edge_list_.find(e) != edge_list_.end();
-		// }
-
+		// ===========
 		// COMPARATORS
+		// -----------
 		struct node_comparator {
 			using is_transparent = std::true_type;
 
@@ -588,17 +529,13 @@ namespace gdwg {
 
 		std::set<std::shared_ptr<node>, node_comparator> node_list_{}; // NODE LIST (SET)
 		std::set<std::shared_ptr<edge>, edge_comparator> edge_list_{}; // EDGE LIST (SET)
-
-	public:
-	}; // namespace gdwg
-
+	};
+	//   ==============
 	//   ITERATOR CLASS
 	//   --------------
-	template<concepts::regular N, concepts::regular E>
-	requires concepts::totally_ordered<N> //
-	   and concepts::totally_ordered<E> //
 
-	   class graph<N, E>::iterator {
+	template<concepts::regular N, concepts::regular E>
+	requires concepts::totally_ordered<N>and concepts::totally_ordered<E> class graph<N, E>::iterator {
 	public:
 		using value_type = ranges::common_tuple<N, N, E>;
 		using difference_type = std::ptrdiff_t;

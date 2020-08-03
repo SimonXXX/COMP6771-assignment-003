@@ -1,167 +1,287 @@
 #include "gdwg/graph.hpp"
+
 #include <catch2/catch.hpp>
 #include <concepts/concepts.hpp>
+#include <fmt/core.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <linux/limits.h>
+#include <range/v3/algorithm/is_sorted.hpp>
 #include <sstream>
-#include <type_traits>
 
-TEST_CASE("iterator test") {
-	SECTION("") {
-		using graph = gdwg::graph<int, int>;
-		auto const v = std::vector<graph::value_type>{
-		   {4, 1, -4},
-		   {3, 2, 2},
-		   {2, 4, 2},
-		   {2, 1, 1},
-		   {6, 2, 5},
-		   {6, 3, 10},
-		   {1, 5, -1},
-		   {3, 6, -8},
-		   {4, 5, 3},
-		   {5, 2, 7},
-		};
+// =============================
+// Accessors section 2.4)
+// -----------------------------
+
+TEST_CASE("accessor 1 (checks if a value represents a node)") {
+	SECTION("Basic check as this has been extensively tested in other test_cases") {
+		using graph = gdwg::graph<double, char>;
+		auto v = std::vector<graph::value_type>{{12.12, 99.9, '4'}, {1.1, 2.2, '3'}, {7.7, 7.7, 'a'}};
 		auto g1 = graph(v.begin(), v.end());
-		auto const& g2 = std::as_const(g1);
-		{
-			// Test for equality
-			REQUIRE(g1.begin() != g1.end());
-
-			REQUIRE(g2.begin() != g2.end());
-			REQUIRE(g1.begin() == g2.begin());
-			REQUIRE(g2.begin() == g1.begin());
-			REQUIRE(g1.end() == g2.end());
-			REQUIRE(g2.end() == g1.end());
-		}
+		auto dbl_var = 999.999;
+		CHECK(!g1.is_node(dbl_var));
+		REQUIRE(g1.insert_node(dbl_var));
+		CHECK(g1.is_node(dbl_var));
+		CHECK(ranges::all_of(v, [&](graph::value_type node) { return g1.is_node(node.from); }));
+		CHECK(ranges::all_of(v, [&](graph::value_type node) { return g1.is_node(node.to); }));
+	}
+	SECTION("test on empty graph") {
+		using graph1 = gdwg::graph<int, std::string>;
+		auto g1 = graph1();
+		REQUIRE(g1.empty());
+		CHECK(!g1.is_node('a'));
+		CHECK(!g1.is_node(1));
+		CHECK(!g1.is_node('\u0000'));
+		using graph2 = gdwg::graph<std::string, double>;
+		auto g2 = graph2();
+		REQUIRE(g2.empty());
+		CHECK(!g2.is_node(""));
+		CHECK(!g2.is_node("Hello"));
 	}
 }
-TEST_CASE("edge erase") {
-	SECTION("") {
-		using graph = gdwg::graph<int, int>;
-		auto const v = std::vector<graph::value_type>{
-		   {4, 1, -4},
-		   {3, 2, 2},
-		   {2, 4, 2},
-		   {2, 1, 1},
-		   {6, 2, 5},
-		   {6, 3, 10},
-		   {1, 5, -1},
-		   {3, 6, -8},
-		   {4, 5, 3},
-		   {5, 2, 7},
-		};
-		auto g1 = graph(v.begin(), v.end());
-		auto i = g1.find(2, 4, 2);
-		auto s = g1.find(4, 1, -4);
-		std::cout << std::endl;
-		auto x = g1.erase_edge(i, s);
-		std::cout << std::get<0>(*x) << " >> " << std::get<2>(*x) << " >> " << std::get<1>(*x)
-		          << std::endl;
 
-		for (auto const& [from, to, weight] : g1) {
-			std::cout << from << std::endl;
-		}
+TEST_CASE("accessor 2 (checks if the graph is empty") {
+	SECTION("Basic checks as this has been extensively tested in other test_cases") {
+		using graph = gdwg::graph<int, std::string>;
+		auto g1 = graph();
+		CHECK(g1.empty());
+		REQUIRE(g1.insert_node(42));
+		REQUIRE(g1.insert_node(999));
+		REQUIRE(g1.insert_edge(42, 999, "Hello"));
+		CHECK(!g1.empty());
+		std::initializer_list<int> il1{};
+		auto g2 = graph(il1);
+		CHECK(g2.empty());
+		REQUIRE(g2.insert_node(42));
+		CHECK(!g2.empty());
 	}
-	SECTION("") {
+}
+
+TEST_CASE("accessor 3 (checks if two nodes are connected") {
+	SECTION("Check basic connections") {
+		using graph = gdwg::graph<int, char>;
+		auto v = std::vector<graph::value_type>{{12, 99, '4'}, {1, 2, '3'}, {7, 7, 'a'}};
+		auto g1 = graph(v.begin(), v.end());
+		CHECK(g1.is_connected(12, 99));
+		CHECK(g1.is_connected(1, 2));
+		CHECK(g1.is_connected(7, 7));
+	}
+	SECTION("Check non existant nodes and edges") {
+		using graph = gdwg::graph<int, char>;
+		auto v = std::vector<graph::value_type>{{12, 99, '4'}, {1, 2, '3'}, {7, 7, 'a'}};
+		auto g1 = graph(v.begin(), v.end());
+		REQUIRE(!g1.is_connected(99, 12));
+		REQUIRE(!g1.is_connected(2, 1));
+		CHECK_THROWS_WITH(g1.is_connected(3, 4),
+		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't "
+		                  "exist in the graph");
+		CHECK_THROWS_WITH(g1.is_connected(12, 4),
+		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't "
+		                  "exist in the graph");
+		CHECK_THROWS_WITH(g1.is_connected(3, 1),
+		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node don't "
+		                  "exist in the graph");
+		CHECK(!g1.is_connected(7, 99));
+		CHECK(!g1.is_connected(7, 12));
+		CHECK(!g1.is_connected(7, 1));
+		CHECK(!g1.is_connected(7, 2));
+	}
+}
+
+TEST_CASE("accessor 4 (returns a sequence of nodes") {
+	SECTION("Check with populated graph") {
+		using graph = gdwg::graph<char, double>;
+		std::initializer_list<char> il1{'a', 'j', 'c', 'g', 'g', 'b', 'i', 'f', 'd', 'e'};
+		auto g1 = graph(il1);
+		auto v = g1.nodes();
+		REQUIRE(!v.empty());
+		CHECK(ranges::is_sorted(v));
+	}
+	SECTION("Check with empty graph") {
+		using graph = gdwg::graph<char, double>;
+		auto g1 = graph();
+		auto v = g1.nodes();
+		REQUIRE(v.empty());
+	}
+}
+
+TEST_CASE("accessor 5 (returns a sequence of weights)") {
+	SECTION("Check with populated graph") {
 		using graph = gdwg::graph<int, int>;
 		auto const v = std::vector<graph::value_type>{
-		   {4, 1, -4},
-		   {3, 2, 2},
-		   {2, 4, 2},
-		   {2, 1, 1},
-		   {6, 2, 5},
-		   {6, 3, 10},
 		   {1, 5, -1},
+		   {2, 1, 1},
+		   {2, 4, 2},
+		   {3, 2, 2},
+		   {3, 5, 2},
 		   {3, 6, -8},
+		   {4, 1, -4},
 		   {4, 5, 3},
 		   {5, 2, 7},
+		   {6, 2, 5},
+		   {6, 3, 10},
 		};
 		auto g1 = graph(v.begin(), v.end());
-		auto it = g1.find(2, 1, 1);
-		CHECK(std::get<0>(*it) == 2);
-		++it;
+		auto wts = g1.weights(3, 5); // only 1 edge
+		CHECK(!wts.empty());
+		CHECK(wts[0] == 2);
+		wts = g1.weights(5, 1); // no edge
+		CHECK(wts.empty());
+		REQUIRE(g1.insert_edge(4, 5, 42));
+		REQUIRE(g1.insert_edge(4, 5, 6));
+		REQUIRE(g1.insert_edge(4, 5, 1));
+		REQUIRE(g1.insert_edge(4, 5, 999));
+		wts = g1.weights(4, 5); // multiple edges
+		CHECK(wts.size() == 5);
+		CHECK(ranges::is_sorted(wts));
+	}
+	SECTION("Check with non existant nodes") {
+		using graph = gdwg::graph<char, double>;
+		auto g1 = graph();
+		auto v = g1.nodes();
+		CHECK_THROWS_WITH(g1.weights('5', '1'),
+		                  "Cannot call gdwg::graph<N, E>::weights if src or dst node don't exist in "
+		                  "the graph");
+		REQUIRE(g1.insert_node('5'));
+		CHECK_THROWS_WITH(g1.weights('5', '1'),
+		                  "Cannot call gdwg::graph<N, E>::weights if src or dst node don't exist in "
+		                  "the graph");
+		CHECK_THROWS_WITH(g1.weights('1', '5'),
+		                  "Cannot call gdwg::graph<N, E>::weights if src or dst node don't exist in "
+		                  "the graph");
+	}
+}
+TEST_CASE("accessor 6 (return an iterator to an edge)") {
+	SECTION("Check finds correct edge") {
+		using graph = gdwg::graph<int, char>;
+		auto const v = std::vector<graph::value_type>{
+		   {1, 5, '-'},
+		   {2, 1, '1'},
+		   {2, 4, '%'},
+		   {5, 2, '7'},
+		   {6, 2, '5'},
+		   {6, 3, '@'},
+		};
+		auto g1 = graph(v.begin(), v.end());
+		auto it = g1.find(2, 4, '%'); // edge exists
 		CHECK(std::get<0>(*it) == 2);
 		CHECK(std::get<1>(*it) == 4);
-		auto it1 = g1.end();
-		CHECK(std::get<0>(*--it1) == 6);
+		CHECK(std::get<2>(*it) == '%');
+	}
+	SECTION("Check when no edge can be found") {
+		using graph = gdwg::graph<int, char>;
+		auto const v = std::vector<graph::value_type>{
+		   {1, 5, '-'},
+		   {2, 1, '1'},
+		   {2, 4, '%'},
+		   {5, 2, '7'},
+		   {6, 2, '5'},
+		   {6, 3, '@'},
+		};
+		auto g1 = graph(v.begin(), v.end());
+		auto it1 = g1.find(2, 4, '$'); // edge doesnt exists - nodes connected
+		CHECK(it1 == g1.end());
+		auto it2 = g1.find(6, 4, '4'); // edge doesnt exists - nodes not connected
+		CHECK(it2 == g1.end());
+		auto it3 = g1.find(7, 4, '4'); // node doesnt exist
+		CHECK(it3 == g1.end());
+		auto it4 = g1.find(4, 7, '4'); // node doesnt exist
+		CHECK(it4 == g1.end());
+		auto it5 = g1.find(7, 8, '4'); // both nodes dont exist
+		CHECK(it5 == g1.end());
 	}
 }
-
-template<concepts::regular N, concepts::regular E>
-requires concepts::totally_ordered<N> //
-   and concepts::totally_ordered<E> //
-   auto test_different_types(std::vector<typename gdwg::graph<N, E>::value_type> const& v,
-                             std::vector<N> const& nodes) {
-	REQUIRE(v.size() > 2);
-	using graph = gdwg::graph<N, E>;
-
-	auto g1 = graph(v.begin(), v.end());
-	auto g2 = graph(v.begin(), v.end());
-	CHECK(g1 == g2);
-	g1.insert_node(nodes[0]);
-	CHECK(!(g1 == g2));
-	auto g3 = std::move(g1);
-	// NOLINTNEXTLINE
-	CHECK(g1.empty());
-
-	auto it_start = g3.begin();
-	auto it_finish = g3.end();
-	CHECK(it_start != it_finish);
-	auto it = g3.begin();
-	it++;
-	it++;
-	std::cout << g3.edge_details_test(v[2]) << std::endl;
-	// std::cout << std::get<0>(*it) << std::endl;
-	// auto i = 1;
-	// while (i < 11) {
-	// 	std::cout << (*it) << std::endl;
-	// 	++it;
-	// 	i++;
-	// }
-}
-TEST_CASE("") {
-	SECTION("int int") {
-		auto const v = std::vector<gdwg::graph<int, int>::value_type>{
-		   {4, 1, -4},
-		   {3, 2, 2},
-		   {2, 4, 2},
-		   {2, 1, 1},
-		   {6, 2, 5},
-		   {6, 3, 10},
+TEST_CASE("accessor 7 (returns a sequence of nodes connected to a given node)") {
+	SECTION("Check finds correct nodes") {
+		using graph = gdwg::graph<int, int>;
+		auto const v = std::vector<graph::value_type>{
 		   {1, 5, -1},
+		   {2, 1, 1},
+		   {2, 4, 2},
+		   {3, 2, 2},
+		   {3, 5, 2},
 		   {3, 6, -8},
+		   {4, 1, -4},
 		   {4, 5, 3},
 		   {5, 2, 7},
+		   {6, 2, 5},
+		   {6, 3, 10},
 		};
-		auto const nodes = std::vector<int>{64, 77, 42};
-		test_different_types<int, int>(v, nodes);
+		auto g1 = graph(v.begin(), v.end());
+		auto cons = g1.connections(3);
+		CHECK(cons.size() == 3);
+		CHECK(ranges::is_sorted(cons));
+		cons = g1.connections(1);
+		CHECK(cons.size() == 1);
+		REQUIRE(g1.insert_node(42));
+		cons = g1.connections(42);
+		CHECK(cons.empty());
 	}
-	SECTION("int, std::string") {
-		auto const v = std::vector<gdwg::graph<int, std::string>::value_type>{{1, 2, "3"},
-		                                                                      {4, 5, "6"},
-		                                                                      {7, 8, "9"}};
-		auto const nodes = std::vector<int>{64, 77, 42};
-		test_different_types<int, std::string>(v, nodes);
+	SECTION("Check with non-existant nodes") {
+		using graph = gdwg::graph<char, double>;
+		auto g1 = graph();
+		auto v = g1.nodes();
+		CHECK_THROWS_WITH(g1.connections(1),
+		                  "Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
+		                  "graph");
+		REQUIRE(g1.insert_node('5'));
+		REQUIRE(g1.insert_node('4'));
+		auto cons = g1.connections('5'); // two nodes and no edges
+		CHECK(cons.empty());
+		CHECK_THROWS_WITH(g1.connections('3'),
+		                  "Cannot call gdwg::graph<N, E>::connections if src doesn't exist in the "
+		                  "graph");
+	}
+}
+// ==========================
+// RANGE ACCESS (section 2.5)
+// --------------------------
+
+TEST_CASE("Range access (begin() and end())- extensively tested as part of other tests") {
+	SECTION("Check with populated graph") {
+		using graph = gdwg::graph<int, char>;
+		auto const v = std::vector<graph::value_type>{
+		   {1, 5, '-'},
+		   {2, 1, '1'},
+		   {2, 4, '%'},
+		   {5, 2, '7'},
+		   {6, 2, '5'},
+		   {6, 3, '@'},
+		};
+		auto g1 = graph(v.begin(), v.end());
+		auto it = g1.begin();
+		CHECK(std::get<0>(*it) == 1);
+		CHECK(std::get<1>(*it) == 5);
+		CHECK(std::get<2>(*it) == '-');
+		auto it1 = g1.end();
+		--it1;
+		CHECK(std::get<0>(*it1) == 6);
+		CHECK(std::get<1>(*it1) == 3);
+		CHECK(std::get<2>(*it1) == '@');
 	}
 
-	SECTION("std::string, std::string") {
-		auto const v = std::vector<gdwg::graph<std::string, std::string>::value_type>{{"1", "2", "3"},
-		                                                                              {"4", "5", "6"},
-		                                                                              {"7", "8", "9"}};
-		auto const nodes = std::vector<std::string>{"1066", "77", "42"};
-		test_different_types<std::string, std::string>(v, nodes);
+	SECTION("Check with empty graph and one edge graph") {
+		using graph = gdwg::graph<char, double>;
+		auto g1 = graph();
+		auto v = g1.nodes();
+		CHECK(g1.begin() == g1.end());
+		REQUIRE(g1.insert_node('5'));
+		CHECK(g1.begin() == g1.end());
+		REQUIRE(g1.insert_node('4'));
+		CHECK(g1.begin() == g1.end());
+		REQUIRE(g1.insert_edge('5', '4', 42.42));
+		CHECK(g1.begin() != g1.end());
+		auto it = g1.begin();
+		REQUIRE(it == --g1.end());
+		CHECK(std::get<0>(*it) == '5');
+		CHECK(std::get<1>(*it) == '4');
+		CHECK(std::get<2>(*it) == 42.42);
 	}
-	SECTION("char, double") {
-		auto const v = std::vector<gdwg::graph<char, double>::value_type>{{'a', 'b', 2.123},
-		                                                                  {'c', 'd', 42.42},
-		                                                                  {'e', 'f', 999.42}};
-		auto const nodes = std::vector<char>{'x', 'y', 'z'};
-		test_different_types<char, double>(v, nodes);
-	}
-	// SECTION("") {
-	// auto const v = std::vector<gdwg::graph<>::value_type>{
-	//{,,,},
-	// };
-	// test_different_types<>(v);
-	//}
 }
+// TEST_CASE("") {
+// 	SECTION("") {
+
+// 	}
+// 	SECTION("") {
+// 	}
+// }
