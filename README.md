@@ -28,6 +28,7 @@ Four constructors, move constructor/assignment and copy constructor/assignment w
 There was extensive 
 
 MODIFIERS (spec: section 2.3)
+-----------------------------
 modifier 1 (inserting a node)
 modifier 2 (inserting an edge)
 modifier 3 (replacing a node)
@@ -40,6 +41,7 @@ modifier 9 (erases all nodes and edges from graph)
 
 
 ACCESSORS (section 2.4)
+-----------------------
 accessor 1 (checks if a value represents a node)
 accessor 2 (checks if the graph is empty
 accessor 3 (checks if two nodes are connected)
@@ -49,7 +51,13 @@ accessor 6 (return an iterator to an edge)
 accessor 7 (returns a sequence of nodes connected to a given node)
 
 RANGE ACCESS (section 2.5)
+--------------------------
 range access 1 (return iterator to first element in graph)
 range access 2 (return iterator to end of the range of elements
 
 COMPARISONS (section 2.6)
+-------------------------
+
+
+
+
