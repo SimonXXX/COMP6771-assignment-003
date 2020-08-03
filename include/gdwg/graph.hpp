@@ -78,7 +78,7 @@ namespace gdwg {
 			// edge constructors
 			edge() = delete;
 
-			edge(std::shared_ptr<node> f, std::shared_ptr<node> t, E w)
+			edge(std::shared_ptr<node> f, std::shared_ptr<node> t, E w) noexcept
 			: weight_{w} {
 				from_ptr_ = std::move(f);
 				to_ptr_ = std::move(t);
@@ -170,7 +170,7 @@ namespace gdwg {
 		graph<N, E>(graph const&) = default;
 
 		// copy assignment
-		auto operator=(graph const& other) -> graph& {
+		auto operator=(graph const& other) noexcept -> graph& {
 			if (this != &other) {
 				auto copy = graph(other);
 				std::swap(copy, *this);
@@ -185,7 +185,7 @@ namespace gdwg {
 
 		// modifier 1 (inserting a node)
 		template<typename T>
-		auto insert_node(T const new_node) -> bool {
+		auto insert_node(T const new_node) noexcept -> bool {
 			if (!is_node(new_node)) {
 				return node_list_.emplace(std::make_shared<node>(new_node)).second;
 			}
@@ -237,7 +237,6 @@ namespace gdwg {
 					it_edge_ptr->set_to_ptr(find_node(new_data));
 				}
 			}
-
 			// get rid of duplicate edges
 			remove_duplicate_edges();
 		}
@@ -311,12 +310,12 @@ namespace gdwg {
 		// ACCESSORS (section 2.4)
 		// -----------------------
 		// accessor 1 (checks if a value represents a node)
-		[[nodiscard]] auto is_node(N n) -> bool {
+		[[nodiscard]] auto is_node(N n) noexcept -> bool {
 			return node_list_.find(n) != node_list_.end();
 		}
 
 		// accessor 2 (checks if the graph is empty
-		[[nodiscard]] auto empty() -> bool {
+		[[nodiscard]] auto empty() noexcept -> bool {
 			return node_list_.empty();
 		}
 
@@ -464,7 +463,7 @@ namespace gdwg {
 		[[nodiscard]] auto is_edge(N const& src, N const& dst, E const& weight) -> bool {
 			return edge_list_.find(value_type{src, dst, weight}) != edge_list_.end();
 		}
-		auto remove_duplicate_edges() {
+		auto remove_duplicate_edges() noexcept {
 			auto edges_to_delete = std::vector<value_type>{};
 			auto it_edge_ptr = edge_list_.begin();
 			auto prev = (*it_edge_ptr++)->get_edge_details();
@@ -590,14 +589,6 @@ namespace gdwg {
 		std::set<std::shared_ptr<edge>, edge_comparator> const& edge_list_ref_;
 		graph_iterator iterator_;
 	}; // end of interator
-
-	// template<concepts::regular N, concepts::regular E>
-	// requires concepts::totally_ordered<N> //
-	//    and concepts::totally_ordered<E> //
-	//    auto operator<<(std::ostream& os, graph<N, E> const& g) -> std::ostream& {
-	// 	(void)g;
-	// 	return os;
-	// }
 
 } // namespace gdwg
 

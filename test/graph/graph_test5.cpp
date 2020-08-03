@@ -73,14 +73,4 @@ TEST_CASE("Test different type combinations") {
 		auto const nodes = std::vector<char>{'x', 'y', 'z'};
 		test_different_types<char, double>(v, nodes);
 	}
-	// SECTION("std::vector<int>, double") {
-	// 	auto const v = std::vector<gdwg::graph<std::vector<int>, double>::value_type>{
-	// 	   {std::vector<int>{2, 2, 3}, std::vector<int>{1, 2, 3}, 2.123},
-	// 	   {std::vector<int>{3, 2, 3}, std::vector<int>{2, 2, 3}, 42.42},
-	// 	   {std::vector<int>{4, 2, 3}, std::vector<int>{3, 2, 3}, 999.42}};
-	// 	auto const nodes = std::vector<std::vector<int>>{std::vector<int>{5, 2, 3},
-	// 	                                                 std::vector<int>{6, 2, 3},
-	// 	                                                 std::vector<int>{7, 2, 3}};
-	// 	test_different_types<std::vector<int>, double>(v, nodes);
-	// }
 }
