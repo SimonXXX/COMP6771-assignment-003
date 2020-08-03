@@ -591,13 +591,13 @@ namespace gdwg {
 		graph_iterator iterator_;
 	}; // end of interator
 
-	template<concepts::regular N, concepts::regular E>
-	requires concepts::totally_ordered<N> //
-	   and concepts::totally_ordered<E> //
-	   auto operator<<(std::ostream& os, graph<N, E> const& g) -> std::ostream& {
-		(void)g;
-		return os;
-	}
+	// template<concepts::regular N, concepts::regular E>
+	// requires concepts::totally_ordered<N> //
+	//    and concepts::totally_ordered<E> //
+	//    auto operator<<(std::ostream& os, graph<N, E> const& g) -> std::ostream& {
+	// 	(void)g;
+	// 	return os;
+	// }
 
 } // namespace gdwg
 

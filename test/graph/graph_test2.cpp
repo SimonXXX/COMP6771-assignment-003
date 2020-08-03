@@ -9,7 +9,7 @@
 // =============================
 // MODIFIERS (spec: section 2.3)
 // -----------------------------
-TEST_CASE("modifier 1 (inserting a node)") {
+TEST_CASE("Modifier 1 (inserting a node)") {
 	SECTION("insert node in graph") {
 		using graph = gdwg::graph<double, char>;
 		// insert in empty graph
@@ -30,7 +30,7 @@ TEST_CASE("modifier 1 (inserting a node)") {
 		CHECK(!g1.insert_node(""));
 	}
 }
-TEST_CASE("modifier 2 (inserting an edge)") {
+TEST_CASE("Modifier 2 (inserting an edge)") {
 	SECTION("insert edges in empty graph") {
 		using graph = gdwg::graph<double, char>;
 		// insert in empty graph
@@ -67,7 +67,7 @@ TEST_CASE("modifier 2 (inserting an edge)") {
 	}
 }
 
-TEST_CASE("modifier 3 (replacing a node)") {
+TEST_CASE("Modifier 3 (replacing a node)") {
 	SECTION("replace node in populated graph") {
 		using graph = gdwg::graph<double, std::string>;
 		auto v = std::vector<graph::value_type>{{12.12, 99.9, "4"}, {1.1, 2.2, "3"}, {7.7, 7.7, "a"}};
@@ -99,7 +99,7 @@ TEST_CASE("modifier 3 (replacing a node)") {
 		                  "Cannot call gdwg::graph<N, E>::replace_node on a node that doesn't exist");
 	}
 }
-TEST_CASE("modifier 4 (replacing a node and redirect weights to new node)") {
+TEST_CASE("Modifier 4 (replacing a node and redirect weights to new node)") {
 	SECTION("Example given in spec") {
 		// 	Operation: merge_replace_node(A, B)
 		// Graph before: (A,B,1),(A,C,2),(A,D,3)
@@ -204,7 +204,7 @@ D (
 	}
 }
 
-TEST_CASE("modifier 5 (erase node and edges from and to that node)") {
+TEST_CASE("Modifier 5 (erase node and edges from and to that node)") {
 	SECTION("all edges go to one node which is removed") {
 		// Graph before: (A,B,1),(A,C,2),(A,D,3)
 		// Graph after : no edges
@@ -230,7 +230,7 @@ TEST_CASE("modifier 5 (erase node and edges from and to that node)") {
 	}
 }
 
-TEST_CASE("modifier 6 (remove an edge from the graph - with node/node/weight)") {
+TEST_CASE("Modifier 6 (remove an edge from the graph - with node/node/weight)") {
 	SECTION("erase edge to node with multiple edges") {
 		// Graph before: (A,B,1),(A,C,2),(A,D,3)
 		// Graph after : (A,C,2),(A,D,3) plus node B
@@ -288,7 +288,7 @@ TEST_CASE("modifier 6 (remove an edge from the graph - with node/node/weight)") 
 	}
 }
 
-TEST_CASE("modifier 7 (remove an edge from graph - with an iterator)") {
+TEST_CASE("Modifier 7 (remove an edge from graph - with an iterator)") {
 	SECTION("erase edge to node with multiple edges") {
 		// Graph before: (A,B,1),(A,C,2),(A,D,3)
 		// Graph after : (A,C,2),(A,D,3) plus node B
@@ -332,7 +332,7 @@ TEST_CASE("modifier 7 (remove an edge from graph - with an iterator)") {
 		CHECK(return_it == g1.end()); // the last edge was erased
 	}
 }
-TEST_CASE("modifier 8 (erases a range of edges)") {
+TEST_CASE("Modifier 8 (erases a range of edges)") {
 	SECTION("erase three edges from middle of graph") {
 		using graph = gdwg::graph<int, int>;
 		auto const v = std::vector<graph::value_type>{
@@ -408,7 +408,7 @@ TEST_CASE("modifier 8 (erases a range of edges)") {
 		CHECK(return_it2 == s2);
 	}
 }
-TEST_CASE("modifier 9 (erases all nodes and edges from graph)") {
+TEST_CASE("Modifier 9 (erases all nodes and edges from graph)") {
 	SECTION("clear a graph and check there are no nodes") {
 		using graph = gdwg::graph<char, int>;
 		auto v = std::vector<graph::value_type>{{'A', 'B', 1}, {'A', 'C', 2}, {'A', 'D', 3}};
@@ -424,242 +424,3 @@ TEST_CASE("modifier 9 (erases all nodes and edges from graph)") {
 		CHECK(!g1.is_node('E'));
 	}
 }
-
-// TEST_CASE("2.7 Extractor") {
-// 	using graph = gdwg::graph<int, int>;
-// 	auto const v = std::vector<graph::value_type>{
-// 	   {4, 1, -4},
-// 	   {3, 2, 2},
-// 	   {2, 4, 2},
-// 	   {2, 1, 1},
-// 	   {6, 2, 5},
-// 	   {6, 3, 10},
-// 	   {1, 5, -1},
-// 	   {3, 6, -8},
-// 	   {4, 5, 3},
-// 	   {5, 2, 7},
-// 	};
-
-// 	auto g = graph(v.begin(), v.end());
-// 	g.insert_node(64);
-// 	auto out = std::ostringstream{};
-// 	out << g;
-// 	auto const expected_output = std::string_view(R"(1 (
-//   5 | -1
-// )
-// 2 (
-//   1 | 1
-//   4 | 2
-// )
-// 3 (
-//   2 | 2
-//   6 | -8
-// )
-// 4 (
-//   1 | -4
-//   5 | 3
-// )
-// 5 (
-//   2
-
-// TEST_CASE("2.7 Extractor") {
-// 	using graph = gdwg::graph<int, int>;
-// 	auto const v = std::vector<graph::value_type>{
-// 	   {4, 1, -4},
-// 	   {3, 2, 2},
-// 	   {2, 4, 2},
-// 	   {2, 1, 1},
-// 	   {6, 2, 5},
-// 	   {6, 3, 10},
-// 	   {1, 5, -1},
-// 	   {3, 6, -8},
-// 	   {4, 5, 3},
-// 	   {5, 2, 7},
-// 	};
-
-// TEST_CASE("2.7 Extractor") {
-// 	using graph = gdwg::graph<int, int>;
-// 	auto const v = std::vector<graph::value_type>{
-// 	   {4, 1, -4},
-// 	   {3, 2, 2},
-// 	   {2, 4, 2},
-// 	   {2, 1, 1},
-// 	   {6, 2, 5},
-// 	   {6, 3, 10},
-// 	   {1, 5, -1},
-// 	   {3, 6, -8},
-// 	   {4, 5, 3},
-// 	   {5, 2, 7},
-// 	};
-
-// 	auto g = graph(v.begin(), v.end());
-// 	g.insert_node(64);
-// 	auto out = std::ostringstream{};
-// 	out << g;
-// 	auto const expected_output = std::string_view(R"(1 (
-//   5 | -1
-// )
-// 2 (
-//   1 | 1
-//   4 | 2
-// )
-// 3 (
-//   2 | 2
-//   6 | -8
-// )
-// 4 (
-//   1 | -4
-//   5 | 3
-// )
-// 5 (
-//   2 | 7
-// )
-// 6 (uto out = std::ostringstream{};
-// 	out << g;
-// 	auto const expected_output = std::string_view(R"(1 (
-//   5 | -1
-// )
-// 2 (
-//   1 | 1
-//   4 | 2
-// )
-// 3 (
-//   2 | 2
-//   6 | -8
-// )
-// 4 (
-//   1 | -4
-//   5 | 3
-// )
-// 5 (
-//   2 | 7
-// )
-// 6 ( | 7
-// )
-// 6 (
-//   2 | 5
-//   3 | 10
-// )
-// 64 (
-// )
-// )");
-// 	CHECK(out.str() == expected_output);
-// 	// g.print_edges();
-// }
-
-// 	SECTION("is_connected") {
-// 		auto v = std::vector<char>{'A', 'B', 'C', 'D', 'a', 'b', 'c'};
-// 		auto g1 = gdwg::graph<char, int>(v.begin(), v.end());
-// 		g1.insert_edge('A', 'B', 1);
-// 		g1.insert_edge('A', 'C', 2);
-// 		g1.insert_edge('A', 'D', 3);
-// 		g1.insert_edge('D', 'C', 22);
-// 		CHECK(!g1.is_connected('a', 'b')); // neither nodes connected to anything
-// 		g1.insert_edge('a', 'C', 22);
-// 		CHECK(!g1.is_connected('a', 'b')); // first node connected, second no edges
-// 		CHECK(!g1.is_connected('c', 'a')); // second node connected, first no edges
-// 		g1.insert_edge('b', 'C', 22);
-// 		CHECK(!g1.is_connected('a', 'b')); // both nodes connected but not to each other
-// 		CHECK(g1.is_connected('D', 'C')); // nodes connected to each other
-// 		CHECK_THROWS_WITH(g1.is_connected('A', 'E'),
-// 		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node "
-// 		                  "don't "
-// 		                  "exist in the graph");
-// 		CHECK_THROWS_WITH(g1.is_connected('E', 'A'),
-// 		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node "
-// 		                  "don't "
-// 		                  "exist in the graph");
-// 		for (auto i : g1.nodes()) {
-// 			std::cout << i << " ";
-// 		}
-// 		g1.insert_edge('A', 'C', 12);
-// 		g1.insert_edge('A', 'C', 22);
-// 		g1.insert_edge('A', 'C', 32);
-// 		g1.insert_edge('A', 'C', 42);
-// 		g1.insert_edge('A', 'C', -12121212);
-// 		std::cout << std::endl;
-
-// 		for (auto i : g1.weights('A', 'C')) {
-// 			std::cout << i << " ";
-// 		}
-// 		std::cout << std::endl;
-// 	}
-// 	SECTION("weights") {
-// 		auto v = std::vector<char>{0, 1, 4, 5, 6, 7, 2, 3};
-// 		auto g1 = gdwg::graph<int, std::string>(v.begin(), v.end());
-// 		g1.insert_edge(1, 4, "hello");
-// 		g1.insert_edge(1, 5, "1hello");
-// 		g1.insert_edge(1, 7, "2hello");
-// 		g1.insert_edge(1, 6, "3hello");
-// 		g1.insert_edge(1, 6, "7hello");
-// 		g1.insert_edge(0, 7, "34");
-// 		g1.insert_edge(1, 6, "!");
-// 		CHECK_THROWS_WITH(g1.is_connected('A', 'E'),
-// 		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node "
-// 		                  "don't "
-// 		                  "exist in the graph");
-// 		CHECK_THROWS_WITH(g1.is_connected('E', 'A'),
-// 		                  "Cannot call gdwg::graph<N, E>::is_connected if src or dst node "
-// 		                  "don't "
-// 		                  "exist in the graph");
-
-// 		for (const auto& i : g1.weights(1, 6)) {
-// 			std::cout << i << " ";
-// 		}
-// 		std::cout << std::endl;
-// 		for (const auto& i : g1.connections(1)) {
-// 			std::cout << i << " ";
-// 		}
-// 		std::cout << std::endl;
-// 	}
-// }
-
-// TEST_CASE("2.7 Extractor") {
-// 	SECTION("equals") {
-// 		using graph = gdwg::graph<int, int>;
-// 		auto const v = std::vector<graph::value_type>{
-// 		   {4, 1, -4},
-// 		   {3, 2, 2},
-// 		   {2, 4, 2},
-// 		   {2, 1, 1},
-// 		   {6, 2, 5},
-// 		   {6, 3, 10},
-// 		   {1, 5, -1},
-// 		   {3, 6, -8},
-// 		   {4, 5, 3},
-// 		   {5, 2, 7},
-// 		};
-// 		auto g1 = graph(v.begin(), v.end());
-// 		auto g2 = graph(v.begin(), v.end());
-// 		CHECK(g1 == g2);
-// 		g1.insert_node(64);
-// 		CHECK(!(g1 == g2));
-// 		auto g3 = graph();
-// 		auto g4 = graph();
-// 		CHECK(g3 == g4);
-// 		auto it = g1.begin();
-// 		auto ite = g1.end();
-// 		while (it != ite) {
-// 			std::cout << std::get<0>(*it) << " >> " << std::get<2>(*it) << " >> " <<
-// std::get<1>(*it)
-// 			          << std::endl;
-
-// 			++it;
-// 		}
-// 		auto it1 = g1.begin();
-// 		while (it1 != ite) {
-// 			std::cout << std::get<0>(*it1) << " >> " << std::get<2>(*it1) << " >> "
-// 			          << std::get<1>(*it1) << std::endl;
-
-// 			it1++;
-// 		}
-// 		auto it2 = g1.find(3, 2, 2);
-// 		while (it2 != ite) {
-// 			std::cout << std::get<0>(*it2) << " >> " << std::get<2>(*it2) << " >> "
-// 			          << std::get<1>(*it2) << std::endl;
-
-// 			it2++;
-// 		}
-// 		std::cout << g1 << std::endl;
-// 	}
-// }

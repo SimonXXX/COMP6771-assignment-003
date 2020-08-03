@@ -13,7 +13,7 @@
 // Accessors section 2.4)
 // -----------------------------
 
-TEST_CASE("accessor 1 (checks if a value represents a node)") {
+TEST_CASE("Accessor 1 (checks if a value represents a node)") {
 	SECTION("Basic check as this has been extensively tested in other test_cases") {
 		using graph = gdwg::graph<double, char>;
 		auto v = std::vector<graph::value_type>{{12.12, 99.9, '4'}, {1.1, 2.2, '3'}, {7.7, 7.7, 'a'}};
@@ -40,7 +40,7 @@ TEST_CASE("accessor 1 (checks if a value represents a node)") {
 	}
 }
 
-TEST_CASE("accessor 2 (checks if the graph is empty") {
+TEST_CASE("Accessor 2 (checks if the graph is empty") {
 	SECTION("Basic checks as this has been extensively tested in other test_cases") {
 		using graph = gdwg::graph<int, std::string>;
 		auto g1 = graph();
@@ -57,7 +57,7 @@ TEST_CASE("accessor 2 (checks if the graph is empty") {
 	}
 }
 
-TEST_CASE("accessor 3 (checks if two nodes are connected") {
+TEST_CASE("Accessor 3 (checks if two nodes are connected") {
 	SECTION("Check basic connections") {
 		using graph = gdwg::graph<int, char>;
 		auto v = std::vector<graph::value_type>{{12, 99, '4'}, {1, 2, '3'}, {7, 7, 'a'}};
@@ -88,7 +88,7 @@ TEST_CASE("accessor 3 (checks if two nodes are connected") {
 	}
 }
 
-TEST_CASE("accessor 4 (returns a sequence of nodes") {
+TEST_CASE("Accessor 4 (returns a sequence of nodes") {
 	SECTION("Check with populated graph") {
 		using graph = gdwg::graph<char, double>;
 		std::initializer_list<char> il1{'a', 'j', 'c', 'g', 'g', 'b', 'i', 'f', 'd', 'e'};
@@ -105,7 +105,7 @@ TEST_CASE("accessor 4 (returns a sequence of nodes") {
 	}
 }
 
-TEST_CASE("accessor 5 (returns a sequence of weights)") {
+TEST_CASE("Accessor 5 (returns a sequence of weights)") {
 	SECTION("Check with populated graph") {
 		using graph = gdwg::graph<int, int>;
 		auto const v = std::vector<graph::value_type>{
@@ -151,7 +151,7 @@ TEST_CASE("accessor 5 (returns a sequence of weights)") {
 		                  "the graph");
 	}
 }
-TEST_CASE("accessor 6 (return an iterator to an edge)") {
+TEST_CASE("Accessor 6 (return an iterator to an edge)") {
 	SECTION("Check finds correct edge") {
 		using graph = gdwg::graph<int, char>;
 		auto const v = std::vector<graph::value_type>{
@@ -191,7 +191,7 @@ TEST_CASE("accessor 6 (return an iterator to an edge)") {
 		CHECK(it5 == g1.end());
 	}
 }
-TEST_CASE("accessor 7 (returns a sequence of nodes connected to a given node)") {
+TEST_CASE("Accessor 7 (returns a sequence of nodes connected to a given node)") {
 	SECTION("Check finds correct nodes") {
 		using graph = gdwg::graph<int, int>;
 		auto const v = std::vector<graph::value_type>{
@@ -278,10 +278,3 @@ TEST_CASE("Range access (begin() and end())- extensively tested as part of other
 		CHECK(std::get<2>(*it) == 42.42);
 	}
 }
-// TEST_CASE("") {
-// 	SECTION("") {
-
-// 	}
-// 	SECTION("") {
-// 	}
-// }
