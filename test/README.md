@@ -23,7 +23,7 @@ There was no way of putting this in the final test code as there were no public 
 But they did confirm during development that the pointers were shared correctly.
 
 
-CONSTRUCTORS (spec: section 2.2)
+CONSTRUCTORS (section 2.2)
 --------------------------------
 Four constructors, move constructor/assignment and copy constructor/assignment were tested in graph_test1.
 There was extensive testing here with different type combinations and empty vectors and initializer lists.
@@ -31,7 +31,7 @@ Each constructor or assignment operator has its own test case with sections deal
 
 
 
-MODIFIERS (spec: section 2.3)
+MODIFIERS (section 2.3)
 -----------------------------
 The modifiers,i.e. ways of inserting, replacing, removing or erasing nodes and edges were tested in graph_test2.
 The modifiers were numbered according to their order in the assignment specification.
