@@ -310,17 +310,17 @@ namespace gdwg {
 		// ACCESSORS (section 2.4)
 		// -----------------------
 		// accessor 1 (checks if a value represents a node)
-		[[nodiscard]] auto is_node(N n) noexcept -> bool {
+		[[nodiscard]] auto is_node(N n) const noexcept -> bool {
 			return node_list_.find(n) != node_list_.end();
 		}
 
 		// accessor 2 (checks if the graph is empty
-		[[nodiscard]] auto empty() noexcept -> bool {
+		[[nodiscard]] auto empty() const noexcept -> bool {
 			return node_list_.empty();
 		}
 
 		// accessor 3 (checks if two nodes are connected)
-		[[nodiscard]] auto is_connected(N const& src, N const& dst) -> bool {
+		[[nodiscard]] auto is_connected(N const& src, N const& dst) const -> bool {
 			if (!is_node(src) or !is_node(dst)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::is_connected if src or dst "
 				                         "node don't exist in the graph");
@@ -331,7 +331,7 @@ namespace gdwg {
 		}
 
 		// accessor 4 (returns a sequence of nodes
-		[[nodiscard]] auto nodes() -> std::vector<N> {
+		[[nodiscard]] auto nodes() const -> std::vector<N> {
 			auto node_sequence = std::vector<N>{};
 			for (auto node_ptr : node_list_) {
 				node_sequence.push_back(node_ptr->get_node_value());
@@ -340,7 +340,7 @@ namespace gdwg {
 		}
 
 		// accessor 5 (returns a sequence of weights)
-		[[nodiscard]] auto weights(N const& from, N const& to) -> std::vector<E> {
+		[[nodiscard]] auto weights(N const& from, N const& to) const -> std::vector<E> {
 			auto weights_sequence = std::vector<E>{};
 			if (!is_node(from) or !is_node(to)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::weights if src or dst node "
@@ -354,11 +354,11 @@ namespace gdwg {
 			return weights_sequence;
 		}
 		// accessor 6 (return an iterator to an edge)
-		[[nodiscard]] auto find(N const& src, N const& dst, E const& weight) -> iterator {
+		[[nodiscard]] auto find(N const& src, N const& dst, E const& weight) const -> iterator {
 			return iterator(edge_list_, edge_list_.find(value_type{src, dst, weight}));
 		}
 		// accessor 7 (returns a sequence of nodes connected to a given node)
-		[[nodiscard]] auto connections(N const& src) -> std::vector<N> {
+		[[nodiscard]] auto connections(N const& src) const -> std::vector<N> {
 			auto connections = std::vector<N>{};
 			if (!is_node(src)) {
 				throw std::runtime_error("Cannot call gdwg::graph<N, E>::connections if src doesn't "

@@ -173,7 +173,7 @@ TEST_CASE("Copy constructor") {
 		using graph = gdwg::graph<std::string, std::string>;
 		auto const v = std::vector<std::string>{};
 		auto g1 = graph(v.begin(), v.end());
-		auto g2(g1);
+		auto const& g2(g1);
 		CHECK(g1.nodes().empty());
 		CHECK(g2.nodes().empty());
 	}
